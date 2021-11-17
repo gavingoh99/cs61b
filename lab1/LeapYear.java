@@ -14,6 +14,19 @@ public class LeapYear {
         }
     }
 
+    /** isLeapYear takes in a year and checks first whether it is divisible
+     *  by 400 and returns true if it is, else if it is divisible by 4 but not 100
+     *  then it returns true as well, else it returns false
+     */
+    public boolean isLeapYear(int year) {
+        if (year % 400 == 0) {
+            return true;
+        } else if (year % 4 == 0 && year % 100 != 0) {
+            return true;
+        })
+        return false;
+    }
+
     /** Must be provided an integer as a command line argument ARGS. */
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -29,5 +42,6 @@ public class LeapYear {
             }
         }
     }
+
 }
 
