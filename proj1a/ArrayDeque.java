@@ -53,7 +53,7 @@ public class ArrayDeque<T> {
     // - -  - -, first = 1, last = 10
     private void resize() {
         T[] resized = (T[]) new Object[(int) (this.array.length * 1.5)];
-        int startPosition = (int) (resized.length - array.length) / 2;
+        int startPosition = (int) (resized.length - this.size) / 2;
         int temp = startPosition;
         for (int index = first + 1; index <= first + this.size; index++) {
             resized[startPosition] = array[index % array.length];
