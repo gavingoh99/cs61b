@@ -70,7 +70,7 @@ public class ArrayDeque<T> {
         T[] downsized = (T[]) new Object[(int) (this.array.length / 2)];
         int startPosition = (int) (downsized.length - this.size) / 2;
         int temp = startPosition;
-        for (int index = first + 1; index < last; index++) {
+        for (int index = first + 1; index <= first + size; index++) {
             downsized[startPosition] = array[index % array.length];
             startPosition++;
         }

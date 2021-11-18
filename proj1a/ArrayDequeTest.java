@@ -100,4 +100,31 @@ public class ArrayDequeTest {
             x++;
         }
     }
+    @Test
+    public void randomCallsTest() {
+        ArrayDeque<Integer> test = new ArrayDeque<>();
+        test.addLast(0);
+        test.addLast(1);
+        test.addFirst(2);
+        test.removeFirst();
+        test.addLast(4);
+        test.removeFirst();
+        test.addFirst(6);
+        test.removeFirst();
+        test.get(1);
+        test.addLast(9);
+        test.removeFirst();
+        test.addFirst(11);
+        test.addFirst(12);
+        test.removeFirst();
+        test.addLast(14);
+        test.removeFirst();
+        test.removeFirst();
+        test.get(1);
+        test.addFirst(18);
+        test.get(2);
+        test.removeLast();
+        test.removeFirst();
+        test.removeLast();
+    }
 }
