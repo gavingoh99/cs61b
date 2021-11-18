@@ -37,16 +37,21 @@ public class ArrayDeque<T> {
     public int size() {
         return this.size;
     }
-    //consider l l f f l l l l or f f f f l l f f, preferrably during resizing we should try to rearrange
-    // our elements to be f f l l l l l l and f f f f f f l l respectively
-    // we would want something like this with no overflows so that our methods still work - - f f l l l l l l - -
-    // to do so we have to iterate through the filled array like l l f f l l l l, here first = 1, first element is
-    // at index first + 1, iterate from index 2 to index 1: 2, 3, 4, 5, 6, 7, 0, 1 using modulo
+    //consider l l f f l l l l or f f f f l l f f,
+    // preferrably during resizing we should try to rearrange
+    // our elements to be f f l l l l l l
+    // and f f f f f f l l respectively
+    // we would want something like this
+    // with no overflows so that our methods still work - - f f l l l l l l - -
+    // to do so we have to iterate through the filled array
+    // like l l f f l l l l, here first = 1, first element is
+    // at index first + 1, iterate from index 2
+    // to index 1: 2, 3, 4, 5, 6, 7, 0, 1 using modulo
     // and at to position starting at resize.length - array.length / 2
 
     // 20 15 10 5 40 35 30 25, first = 7, last = 0
     // - -  - -, first = 1, last = 10
-    public void resize() {
+    private void resize() {
         T[] resized = (T[]) new Object[(int) (this.array.length * 1.5)];
         int startPosition = (int) (resized.length - array.length) / 2;
         int temp = startPosition;
@@ -58,11 +63,31 @@ public class ArrayDeque<T> {
         last = temp + this.size;
         this.array = resized;
     }
-    //how do we iterate through this array? think circular how do we maintain the bounds within the valid indices?
-    // modulo operator dividing by this.array.length - 1 keeps everything within the valid index 0 - this.array.length-1
-    // l l f f l l l l <- index must take the following values 2 3 4 5 6 7 0 1, - > 2 3 4 5 6 7 8 9...using for loop with modulo
-    // what about f f f f l l x f <- index must take  7 0 1 2 3 4 5, -> 7 8 9 10 11 12 13..using for loop with modulo gives what we want
-    // what about something more normal x x f f l l l x <- index must take 2 3 4 5 6 this is fine we can just use a for loop
+    // 9 10 11 12 5 6 7 8 -> resize -> 3 4 5 6 7 8 9 10 11 12 1 2
+    // remove till last 2 -> - - - - - - - - 11 12 - -, first = 7
+    // downsize to - - 11 12 - -, first = 1, length - size  / 2
+    private void downsize() {
+        T[] downsized = (T[]) new Object[(int) (this.array.length / 2)];
+        int startPosition = (int) (downsized.length - this.size) / 2;
+        int temp = startPosition;
+        for (int index = first + 1; index < last; index++) {
+            downsized[startPosition] = array[index % array.length];
+            startPosition++;
+        }
+        first = temp - 1;
+        last = temp + this.size;
+        this.array = downsized;
+    }
+    //how do we iterate through this array? think circular
+    // how do we maintain the bounds within the valid indices?
+    // modulo operator dividing by this.array.length - 1 keeps everything
+    // within the valid index 0 - this.array.length-1
+    // l l f f l l l l <- index must take the following values
+    // 2 3 4 5 6 7 0 1, - > 2 3 4 5 6 7 8 9...using for loop with modulo
+    // what about f f f f l l x f <- index must take
+    // 7 0 1 2 3 4 5, -> 7 8 9 10 11 12 13..using for loop with modulo gives what we want
+    // what about something more normal x x f f l l l x <- index
+    // must take 2 3 4 5 6 this is fine we can just use a for loop
     public void printDeque() {
         // x x x x x x x x empty
         // l l x x l l l l all lasts or all firsts f f f f x x f f  -> 4 5 6 7 8 9
@@ -74,7 +99,7 @@ public class ArrayDeque<T> {
             return;
         }
         //every other case
-        for(int index = first + 1; index <= first + size; index++) {
+        for (int index = first + 1; index <= first + size; index++) {
             System.out.println(array[index % array.length] + " ");
         }
     }
@@ -82,22 +107,34 @@ public class ArrayDeque<T> {
         if (this.size == 0) {
             return null;
         }
+        if ((double) this.size / this.array.length < 0.25) {
+            downsize();
+        }
         int indexFirst = (first + 1) % this.array.length;
         T item = this.array[indexFirst];
         this.array[indexFirst] = null;
         size--;
         first++;
+        if (first == this.array.length) {
+            first = 0;
+        }
         return item;
     }
     public T removeLast() {
         if (this.size == 0) {
             return null;
         }
+        if ((double) this.size / this.array.length < 0.25) {
+            downsize();
+        }
         int indexLast = (last - 1 + this.array.length) % this.array.length;
         T item = this.array[indexLast];
         this.array[indexLast] = null;
         size--;
         last--;
+        if (last == -1) {
+            last = this.array.length - 1;
+        }
         return item;
     }
     // x x x f l x x x

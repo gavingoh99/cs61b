@@ -86,4 +86,18 @@ public class ArrayDequeTest {
         assertEquals(15, test.get(2).intValue());
         test.printDeque();
     }
+    @Test
+    public void testDownsize() {
+        ArrayDeque<Integer> test = new ArrayDeque<>();
+        int i = 0;
+        while (i < 500) {
+            test.addFirst(i);
+            i++;
+        }
+        int x = 0;
+        while (x < 499) {
+            test.removeFirst();
+            x++;
+        }
+    }
 }
