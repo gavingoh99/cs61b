@@ -6,7 +6,7 @@ public class PalindromeFinder {
         PalindromeFinder finder = new PalindromeFinder();
         int greatestNumberOfWords = 0;
         int greatestN = 0;
-        for(int diff = 0; diff < 26; diff++) {
+        for (int diff = 0; diff < 26; diff++) {
             int currNumber = finder.wordsDifferByN(diff);
             if (currNumber > greatestNumberOfWords) {
                 greatestNumberOfWords = currNumber;

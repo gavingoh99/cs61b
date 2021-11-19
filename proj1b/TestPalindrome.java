@@ -19,8 +19,8 @@ public class TestPalindrome {
     public void testIsPalindrome() {
         //test a palindrome
         assertTrue(palindrome.isPalindrome("noon"));
-        //test isPalindrome ignores upper and lower case
-        assertTrue(palindrome.isPalindrome("RaCecAr"));
+        //test isPalindrome treats upper and lower case differently
+        assertFalse(palindrome.isPalindrome("RaCecAr"));
         //test a word that is not a palindrome
         assertFalse(palindrome.isPalindrome("horse"));
         //test word with one character
@@ -33,8 +33,8 @@ public class TestPalindrome {
         CharacterComparator cc = new OffByOne();
         //test a palindrome that is off by one
         assertTrue(palindrome.isPalindrome("flake", cc));
-        //test isPalindrome ignores upper and lower case
-        assertTrue(palindrome.isPalindrome("FlaKe", cc));
+        //test isPalindrome treats upper and lower case differently
+        assertFalse(palindrome.isPalindrome("FlaKe", cc));
         //test a word that is not a palindrome off by one
         assertFalse(palindrome.isPalindrome("noon", cc));
         //test word with one character

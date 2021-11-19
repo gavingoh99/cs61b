@@ -1,16 +1,14 @@
-import java.util.Locale;
-
 public class Palindrome {
     public Deque<Character> wordToDeque(String word) {
         LinkedListDeque<Character> deque = new LinkedListDeque<>();
-        for(int index = 0; index < word.length(); index++) {
+        for (int index = 0; index < word.length(); index++) {
             char character = word.charAt(index);
             deque.addLast(character);
         }
         return deque;
     }
     public boolean isPalindrome(String word) {
-        return helper(wordToDeque(word.toLowerCase()));
+        return helper(wordToDeque(word));
     }
 //        if (word.length() <= 1) {
 //            return true;
@@ -36,7 +34,7 @@ public class Palindrome {
         return helper(deque);
     }
     public boolean isPalindrome(String word, CharacterComparator cc) {
-        return helper(wordToDeque(word.toLowerCase()), cc);
+        return helper(wordToDeque(word), cc);
     }
     private boolean helper(Deque<Character> deque, CharacterComparator cc) {
         if (deque.size() == 0 || deque.size() == 1) {
