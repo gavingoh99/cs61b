@@ -9,7 +9,8 @@ public class GuitarHero {
     public GuitarHero() {
         this.strings = new GuitarString[37];
         for (int index = 0; index < 37; index++) {
-            strings[index] = new synthesizer.GuitarString(440 * java.lang.Math.pow(2, (index - 24) / 12));
+            double frequency = 440 * java.lang.Math.pow(2, (index - 24) / 12);
+            strings[index] = new synthesizer.GuitarString(frequency);
         }
     }
     public static void main(String[] args) {

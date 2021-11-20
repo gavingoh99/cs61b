@@ -13,7 +13,7 @@ public class TestArrayRingBuffer {
         arb.enqueue(1);
         arb.enqueue(2);
         arb.enqueue(3);
-        for(Integer integer: arb) {
+        for (Integer integer: arb) {
             System.out.println(integer);
         }
     }
