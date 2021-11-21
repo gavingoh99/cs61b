@@ -2,53 +2,66 @@ package byog.Core;
 
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import static byog.Core.MapGenerator.*;
 
 public class Room {
-    private static TETile[][] map;
-    public Room(TETile[][] map) {
-        this.map = map;
+    private int height;
+    private int width;
+    private int startY;
+    private int startX;
+
+    public Room(int height, int width, int startY, int startX) {
+        this.height = height;
+        this.width = width;
+        this.startX = startX;
+        this.startY = startY;
     }
-    public static void buildRoom(int startX, int startY, long seed) {
-        Random rand = new Random(seed);
-        int randomWidth = rand.nextInt(6) + 5;
-        int randomHeight = rand.nextInt(9) + 5;
-        if (startX + randomWidth >= WIDTH || startY + randomHeight >= HEIGHT) {
-            return;
+    public static void createRooms(Room[] rooms) {
+        for (int index = 0; index < rooms.length; index++) {
+            int height = Game.rand.nextInt(10) + 6;
+            int width = Game.rand.nextInt(10) + 6;
+            int startY = Game.rand.nextInt(HEIGHT - height);
+            int startX = Game.rand.nextInt(WIDTH - width);
+            rooms[index] = new Room(height, width, startY, startX);
         }
-        List<Coordinate> roomCoordinates = new ArrayList<>();
-        for (int y = startY; y < startY + randomHeight; y++) {
-            for (int x = startX; x < startX + randomHeight; x++) {
-                roomCoordinates.add(new Coordinate(x, y));
+    }
+    private static void drawRoom(TETile[][] world, Room room) {
+        for (int y = 0; y < room.height; y++) {
+            for (int x = 0; x < room.width; x++) {
+//                if (world[room.startX + x][room.startY + y] != Tileset.FLOOR) {
+//                    world[room.startX + x][room.startY + y] = Tileset.WALL;
+//                }
+                world[room.startX + x][room.startY + y] = Tileset.WALL;
             }
         }
-        for (Coordinate coordinate: roomCoordinates) {
-            if (allCoordinates.contains(coordinate)) {
-                return;
+    }
+    private static void fillRoom(TETile[][] world, Room room) {
+        for (int y = 1; y < room.height - 1; y++) {
+            for (int x = 1; x < room.width - 1; x++) {
+                world[room.startX + x][room.startY + y] = Tileset.FLOOR;
             }
         }
-        roomsCoordinates.add(new Coordinate(startX + 1, startY + 1));
-        for (int y = startY; y < startY + randomHeight; y++) {
-            if (y == startY || y == startY + randomHeight - 1) {
-                for (int x = startX; x < startX + randomWidth; x++) {
-                    map[x][y] = Tileset.WALL;
-                    allCoordinates.add(new Coordinate(x, y));
-                }
-            } else {
-                for (int x = startX + 1; x < startX + randomWidth - 1; x++) {
-                    map[x][y] = Tileset.FLOOR;
-                    allCoordinates.add(new Coordinate(x, y));
-                }
-                map[startX][y] = Tileset.WALL;
-                map[startX + randomWidth - 1][y] = Tileset.WALL;
-                allCoordinates.add(new Coordinate(startX, y));
-                allCoordinates.add(new Coordinate(startX + randomWidth - 1, y));
-            }
+    }
+    public static void drawAll(TETile[][] world, int numberOfRooms, Room[] rooms) {
+        for (Room room: rooms) {
+            Room.drawRoom(world, room);
         }
+    }
+    public static void fillAll(TETile[][] world, int numberOfRooms, Room[] rooms) {
+        for (Room room: rooms) {
+            Room.fillRoom(world, room);
+        }
+    }
+    public int getHeight() {
+        return this.height;
+    }
+    public int getWidth() {
+        return this.width;
+    }
+    public int getStartY() {
+        return this.startY;
+    }
+    public int getStartX() {
+        return this.startX;
     }
 }

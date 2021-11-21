@@ -1,48 +1,41 @@
 package byog.Core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import byog.TileEngine.TETile;
+import byog.TileEngine.Tileset;
 
-//Uses DFS as underlying implementation
-//To visit a room from another room
 public class PathGenerator {
-    private static final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-
-    public static List<Coordinate> solve(Map map) {
-        LinkedList<Coordinate> nextToVisit = new LinkedList<>();
-        Coordinate start = map.getStart();
-        nextToVisit.add(start);
-        while (!nextToVisit.isEmpty()) {
-            Coordinate curr = nextToVisit.remove();
-            if (!map.isValid(curr.getY(), curr.getX())) {
-                continue;
-            }
-            if (map.isExplored(curr.getY(), curr.getX())) {
-                continue;
-            }
-            if (map.isExit(curr.getX(), curr.getY())) {
-                return backtrackPath(curr);
-            }
-            for (int[] direction : DIRECTIONS) {
-                int newX = curr.getX() + direction[0];
-                int newY = curr.getY() + direction[1];
-                Coordinate coordinate = new Coordinate(newX, newY, curr);
-                nextToVisit.add(coordinate);
-                map.setVisited(curr.getY(), curr.getX(), true);
-            }
+    public static void drawPath(TETile[][] world, Room first, Room second) {
+        Coordinate cFirst = randomCoordinate(first);
+        Coordinate cSecond = randomCoordinate(second);
+        int diffX = Math.abs(cFirst.getX() - cSecond.getX());
+        int diffY = Math.abs(cFirst.getY() - cSecond.getY());
+        int incrementX = 0;
+        int incrementY = 0;
+        if (diffX != 0) {
+            incrementX = (cSecond.getX() - cFirst.getX()) / diffX;
         }
-        return Collections.emptyList();
+        if (diffX != 0) {
+            incrementY = (cSecond.getY() - cFirst.getY()) / diffY;
+        }
+        int xCoord = cFirst.getX();
+        for (int x = 0; x < diffX; x++) {
+            xCoord += incrementX;
+            world[xCoord][cFirst.getY()] = Tileset.FLOOR;
+        }
+        int yCoord = cFirst.getY();
+        for (int y = 0; y < diffY; y++) {
+            yCoord += incrementY;
+            world[cFirst.getX() + incrementX * diffX][yCoord] = Tileset.FLOOR;
+        }
     }
-
-    private static List<Coordinate> backtrackPath(Coordinate curr) {
-        List<Coordinate> path = new ArrayList<>();
-        Coordinate iter = curr;
-        while (iter != null) {
-            path.add(iter);
-            iter = iter.parent;
+    private static Coordinate randomCoordinate(Room room) {
+        int randomX = Game.rand.nextInt(room.getWidth() - 2) + room.getStartX() + 1;
+        int randomY = Game.rand.nextInt(room.getHeight() - 2) + room.getStartY() + 1;
+        return new Coordinate(randomX, randomY);
+    }
+    public static void drawAll(TETile[][] world, int numberOfRooms, Room[] rooms) {
+        for (int index = 0; index < numberOfRooms - 1; index++) {
+            PathGenerator.drawPath(world, rooms[index], rooms[index + 1]);
         }
-        return path;
     }
 }

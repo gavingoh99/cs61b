@@ -3,40 +3,43 @@ package byog.Core;
 import byog.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Color;
+import java.util.Random;
 
 
 public class Game {
+    static Random rand;
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
     public void playWithKeyboard() {
-        StdDraw.setCanvasSize();
-        StdDraw.clear(Color.BLACK);
-        Font tileFont = new Font("Dialog", Font.PLAIN, 24);
-        StdDraw.setFont(tileFont);
-        StdDraw.setPenColor(Color.white);
-        StdDraw.text(0.5, 0.75, "CS61B: THE GAME");
-        StdDraw.setFont();
-        StdDraw.text(0.5, 0.54, "New Game (N) ");
-        StdDraw.text(0.5, 0.50, "Load Game (L) ");
-        StdDraw.text(0.5, 0.46, "Quit (Q) ");
-        StdDraw.show();
-
-        while (true) {
-            if (StdDraw.hasNextKeyTyped()) {
-                char key = StdDraw.nextKeyTyped();
-                if (key == 'n') {
-                    StdDraw.clear(Color.black);
-                    StdDraw.setFont();
-                    StdDraw.setPenColor(Color.white);
-                    StdDraw.text(.5, .5, "Enter a random seed");
-                    StdDraw.show();
-                    break;
-                }
-            }
-        }
+//        StdDraw.setCanvasSize();
+//        StdDraw.clear(Color.BLACK);
+//        Font tileFont = new Font("Dialog", Font.PLAIN, 24);
+//        StdDraw.setFont(tileFont);
+//        StdDraw.setPenColor(Color.white);
+//        StdDraw.text(0.5, 0.75, "CS61B: THE GAME");
+//        StdDraw.setFont();
+//        StdDraw.text(0.5, 0.54, "New Game (N) ");
+//        StdDraw.text(0.5, 0.50, "Load Game (L) ");
+//        StdDraw.text(0.5, 0.46, "Quit (Q) ");
+//        StdDraw.show();
+//
+//        while (true) {
+//            if (StdDraw.hasNextKeyTyped()) {
+//                char key = StdDraw.nextKeyTyped();
+//                if (key == 'n') {
+//                    StdDraw.clear(Color.black);
+//                    StdDraw.setFont();
+//                    StdDraw.setPenColor(Color.white);
+//                    StdDraw.text(.5, .5, "Enter a random seed");
+//                    StdDraw.show();
+//                    break;
+//                }
+//            }
+//        }
     }
 
     /**
@@ -52,19 +55,24 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        TETile[][] map = MapGenerator.createEmptyWorld();
+        TETile[][] world = MapGenerator.createEmptyWorld();
+        Game.rand = getSeed(input);
+        int numberOfRooms = rand.nextInt(15) + 5;
+        Room[] rooms = new Room[numberOfRooms];
+        MapGenerator.generateRooms(world, numberOfRooms, rooms);
+        PathGenerator.drawAll(world, numberOfRooms, rooms);
+        MapGenerator.fillAll(world);
+        return world;
+    }
+
+    public static Random getSeed(String input) {
         long seed = 0;
         input = input.toUpperCase();
         for (int i = 0; i < input.length(); i++) {
-            if (input.charAt(i) == 'N') {
-                continue;
+            if (Character.isDigit(input.charAt(i))) {
+                seed = 10 * seed + Long.parseLong("" + input.charAt(i));
             }
-            if (input.charAt(i) == 'S' ) {
-                MapGenerator.generateMap(seed, map);
-                continue;
-            }
-            seed = 10 * seed + Long.parseLong("" + input.charAt(i));
         }
-        return map;
+        return new Random(seed);
     }
 }
