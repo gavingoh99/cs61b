@@ -62,7 +62,7 @@ public class HexWorld {
             int widthOfStructure = 0;
             int heightOfStructure = numberOfHexInCenter * heightOfOneHex;
             for (int stack = 0; stack < numberOfStacks; stack++) {
-                if (stack == (int) ((numberOfStacks - 1) / 2)) {
+                if (stack == ((numberOfStacks - 1) / 2)) {
                     distanceFromEdgeToStartX = widthOfStructure;
                 }
                 if (stack % 2 == 0) {
@@ -71,18 +71,18 @@ public class HexWorld {
                     widthOfStructure += sizeOfHexagon;
                 }
             }
-            int emptySpaceAtSides = (int) ((WIDTH - widthOfStructure) / 2);
-            int emptySpaceAtTopBottom = (int) ((HEIGHT - heightOfStructure) / 2);
+            int emptySpaceAtSides = ((WIDTH - widthOfStructure) / 2);
+            int emptySpaceAtTopBottom = ((HEIGHT - heightOfStructure) / 2);
             int startX = distanceFromEdgeToStartX + emptySpaceAtSides;
             int startY = emptySpaceAtTopBottom;
             addCentralHexagonStack(startX, startY, numberOfHexInCenter);
-            addSideHexagonStacks( startX - 2 * sizeOfHexagon + 1, startY + sizeOfHexagon, numberOfHexInCenter - 1, numberOfHexAtSides, 1);
+            addSideHexagonStacks(startX - 2 * sizeOfHexagon + 1, startY + sizeOfHexagon, numberOfHexInCenter - 1, numberOfHexAtSides, 1);
         }
         public void addCentralHexagonStack(int x, int y, int numberOfHex) {
             addHexagonStack(x, y, numberOfHex);
         }
-        public void addSideHexagonStacks(int x, int y, int numberOfHex, int numberOfHexAtSides, int rowFromCenter) {
-            if (numberOfHex < numberOfHexAtSides) {
+        public void addSideHexagonStacks(int x, int y, int numberOfHex, int hexAtSides, int rowFromCenter) {
+            if (numberOfHex < hexAtSides) {
                 return;
             }
             addHexagonStack(x, y, numberOfHex);
