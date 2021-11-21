@@ -13,10 +13,10 @@ public class MapGenerator {
     static List<Coordinate> roomsCoordinates = new ArrayList<>();
     static List<Coordinate> allCoordinates = new ArrayList<>();
 
-    public static void createRooms(TETile[][] map, String seed) {
+    public static void createRooms(TETile[][] map, long seed) {
         new Room(map);
-        Random rand = new Random(Long.parseLong(seed));
-        for (int roomCount = 0; roomCount < 30; roomCount++) {
+        Random rand = new Random(seed);
+        for (int roomCount = 0; roomCount < 15; roomCount++) {
             int randomY = rand.nextInt(HEIGHT);
             int randomX = rand.nextInt(WIDTH);
             Room.buildRoom(randomX, randomY, seed);
@@ -58,7 +58,7 @@ public class MapGenerator {
         }
         return map;
     }
-    public static TETile[][] generateMap(String seed, TETile[][] map) {
+    public static TETile[][] generateMap(long seed, TETile[][] map) {
         createRooms(map, seed);
         generatePaths(map);
         return map;

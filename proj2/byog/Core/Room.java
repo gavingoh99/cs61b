@@ -14,8 +14,8 @@ public class Room {
     public Room(TETile[][] map) {
         this.map = map;
     }
-    public static void buildRoom(int startX, int startY, String seed) {
-        Random rand = new Random(Long.parseLong(seed));
+    public static void buildRoom(int startX, int startY, long seed) {
+        Random rand = new Random(seed);
         int randomWidth = rand.nextInt(6) + 5;
         int randomHeight = rand.nextInt(9) + 5;
         if (startX + randomWidth >= WIDTH || startY + randomHeight >= HEIGHT) {

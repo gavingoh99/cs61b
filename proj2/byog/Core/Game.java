@@ -3,8 +3,7 @@ package byog.Core;
 import byog.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.awt.Font;
-import java.awt.Color;
+import java.awt.*;
 
 
 public class Game {
@@ -54,19 +53,18 @@ public class Game {
      */
     public TETile[][] playWithInputString(String input) {
         TETile[][] map = MapGenerator.createEmptyWorld();
-        String seed = "";
+        long seed = 0;
         input = input.toUpperCase();
-        String[] array = input.split("");
-        for (String character: array) {
-            if (character.equals("N")) {
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) == 'N') {
                 continue;
             }
-            if (character.equals("S")) {
+            if (input.charAt(i) == 'S' ) {
                 MapGenerator.generateMap(seed, map);
+                continue;
             }
-            seed += character;
+            seed = 10 * seed + Long.parseLong("" + input.charAt(i));
         }
-
         return map;
     }
 }
