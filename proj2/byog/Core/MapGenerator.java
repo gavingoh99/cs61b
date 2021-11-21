@@ -15,7 +15,7 @@ public class MapGenerator {
 
     public static void createRooms(TETile[][] map, String seed) {
         new Room(map);
-        Random rand = new Random(Integer.parseInt(seed));
+        Random rand = new Random(Long.parseLong(seed));
         for (int roomCount = 0; roomCount < 30; roomCount++) {
             int randomY = rand.nextInt(HEIGHT);
             int randomX = rand.nextInt(WIDTH);
