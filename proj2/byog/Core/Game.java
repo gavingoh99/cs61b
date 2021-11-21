@@ -5,7 +5,8 @@ import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Color;
 
 
 public class Game {
@@ -19,7 +20,7 @@ public class Game {
      */
     public void playWithKeyboard() {
         StdDraw.setCanvasSize();
-        StdDraw.clear(StdDraw.BLACK);
+        StdDraw.clear(Color.BLACK);
         Font tileFont = new Font("Dialog", Font.PLAIN, 24);
         StdDraw.setFont(tileFont);
         StdDraw.setPenColor(Color.white);
