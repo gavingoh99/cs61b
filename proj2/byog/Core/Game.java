@@ -1,8 +1,6 @@
 package byog.Core;
 
-import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
-import byog.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.Font;
@@ -10,10 +8,6 @@ import java.awt.Color;
 
 
 public class Game {
-    TERenderer ter = new TERenderer();
-    /* Feel free to change the width and height. */
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 40;
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
@@ -59,13 +53,7 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        ter.initialize(WIDTH, HEIGHT);
-        TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
-        for (int x = 0; x < WIDTH; x += 1) {
-            for (int y = 0; y < HEIGHT; y += 1) {
-                finalWorldFrame[x][y] = Tileset.NOTHING;
-            }
-        }
+        TETile[][] map = MapGenerator.createEmptyWorld();
         String seed = "";
         input = input.toUpperCase();
         String[] array = input.split("");
@@ -74,11 +62,11 @@ public class Game {
                 continue;
             }
             if (character.equals("S")) {
-                MapGenerator.generateMap(seed, finalWorldFrame);
+                MapGenerator.generateMap(seed, map);
             }
             seed += character;
         }
-        ter.renderFrame(finalWorldFrame);
-        return finalWorldFrame;
+
+        return map;
     }
 }

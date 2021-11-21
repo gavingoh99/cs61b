@@ -1,5 +1,6 @@
 package byog.Core;
 
+import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
@@ -49,17 +50,23 @@ public class MapGenerator {
             }
         }
     }
+    public static TETile[][] createEmptyWorld() {
+        TERenderer ter = new TERenderer();
+        ter.initialize(WIDTH, HEIGHT);
+        TETile[][] map = new TETile[WIDTH][HEIGHT];
+        for (int x = 0; x < WIDTH; x += 1) {
+            for (int y = 0; y < HEIGHT; y += 1) {
+                map[x][y] = Tileset.NOTHING;
+            }
+        }
+        return map;
+    }
     public static TETile[][] generateMap(String seed, TETile[][] map) {
-//        TERenderer ter = new TERenderer();
-//        ter.initialize(WIDTH, HEIGHT);
-//        TETile[][] map = new TETile[WIDTH][HEIGHT];
-//        for (int x = 0; x < WIDTH; x += 1) {
-//            for (int y = 0; y < HEIGHT; y += 1) {
-//                map[x][y] = Tileset.NOTHING;
-//            }
-//        }
+        TERenderer ter = new TERenderer();
+        ter.initialize(WIDTH, HEIGHT);
         createRooms(map, seed);
         generatePaths(map);
+        ter.renderFrame(map);
         return map;
     }
 }

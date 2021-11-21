@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Random;
 
 import static byog.Core.MapGenerator.*;
-import static byog.Core.Game.WIDTH;
-import static byog.Core.Game.HEIGHT;
 
 public class Room {
     private static TETile[][] map;
