@@ -15,7 +15,7 @@ public class Room {
         this.map = map;
     }
     public static void buildRoom(int startX, int startY, String seed) {
-        Random rand = new Random(Integer.parseInt(seed));
+        Random rand = new Random(Long.parseLong(seed));
         int randomWidth = rand.nextInt(6) + 5;
         int randomHeight = rand.nextInt(9) + 5;
         if (startX + randomWidth >= WIDTH || startY + randomHeight >= HEIGHT) {
