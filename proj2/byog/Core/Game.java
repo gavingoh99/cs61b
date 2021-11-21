@@ -1,10 +1,6 @@
 package byog.Core;
 
 import byog.TileEngine.TETile;
-import edu.princeton.cs.introcs.StdDraw;
-
-import java.awt.Font;
-import java.awt.Color;
 import java.util.Random;
 
 

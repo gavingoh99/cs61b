@@ -14,7 +14,7 @@ public class PathGenerator {
         if (diffX != 0) {
             incrementX = (cSecond.getX() - cFirst.getX()) / diffX;
         }
-        if (diffX != 0) {
+        if (diffY != 0) {
             incrementY = (cSecond.getY() - cFirst.getY()) / diffY;
         }
         int xCoord = cFirst.getX();
