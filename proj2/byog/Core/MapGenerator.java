@@ -6,16 +6,7 @@ import byog.TileEngine.Tileset;
 public class MapGenerator {
     static final int HEIGHT = 40;
     static final int WIDTH = 80;
-
-    public static TETile[][] createEmptyWorld() {
-        TETile[][] world = new TETile[WIDTH][HEIGHT];
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                world[x][y] = Tileset.NOTHING;
-            }
-        }
-        return world;
-    }
+    static Player player;
 
     public static void generateRooms(TETile[][] world, int numberOfRooms, Room[] rooms) {
         Room.createRooms(rooms);
@@ -52,6 +43,50 @@ public class MapGenerator {
                     }
                 }
             }
+        }
+    }
+    public static void moveUp(TETile[][] world, Player player) {
+        int x = player.getX();
+        int y = player.getY();
+        if (world[x][y + 1] == Tileset.FLOOR) {
+            world[x][y] = Tileset.FLOOR;
+            world[x][y + 1] = Tileset.PLAYER;
+            world[x][y].draw(x, y);
+            world[x][y + 1].draw(x, y + 1);
+            player.setY(y + 1);
+        }
+    }
+    public static void moveLeft(TETile[][] world, Player player) {
+        int x = player.getX();
+        int y = player.getY();
+        if (world[x - 1][y] == Tileset.FLOOR) {
+            world[x][y] = Tileset.FLOOR;
+            world[x - 1][y] = Tileset.PLAYER;
+            world[x][y].draw(x, y);
+            world[x - 1][y].draw(x - 1, y);
+            player.setX(x - 1);
+        }
+    }
+    public static void moveDown(TETile[][] world, Player player) {
+        int x = player.getX();
+        int y = player.getY();
+        if (world[x][y - 1] == Tileset.FLOOR) {
+            world[x][y] = Tileset.FLOOR;
+            world[x][y - 1] = Tileset.PLAYER;
+            world[x][y].draw(x, y);
+            world[x][y - 1].draw(x, y - 1);
+            player.setY(y - 1);
+        }
+    }
+    public static void moveRight(TETile[][] world, Player player) {
+        int x = player.getX();
+        int y = player.getY();
+        if (world[x + 1][y] == Tileset.FLOOR) {
+            world[x][y] = Tileset.FLOOR;
+            world[x + 1][y] = Tileset.PLAYER;
+            world[x][y].draw(x, y);
+            world[x + 1][y].draw(x + 1, y);
+            player.setX(x + 1);
         }
     }
 }

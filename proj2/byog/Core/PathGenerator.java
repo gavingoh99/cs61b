@@ -28,7 +28,7 @@ public class PathGenerator {
             world[cFirst.getX() + incrementX * diffX][yCoord] = Tileset.FLOOR;
         }
     }
-    private static Coordinate randomCoordinate(Room room) {
+    public static Coordinate randomCoordinate(Room room) {
         int randomX = Game.rand.nextInt(room.getWidth() - 2) + room.getStartX() + 1;
         int randomY = Game.rand.nextInt(room.getHeight() - 2) + room.getStartY() + 1;
         return new Coordinate(randomX, randomY);
