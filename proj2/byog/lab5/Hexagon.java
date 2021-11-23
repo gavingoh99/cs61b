@@ -6,32 +6,31 @@ import byog.TileEngine.Tileset;
 import java.util.Random;
 
 public class Hexagon {
-    public static void addHexagon(TETile[][] world, int s, int x, int y) {
+    private static TETile tile;
+    public static void addHexagon(int s, int x, int y) {
         int increments = s - 1;
         int rowsAtMiddle = 3 * s - 2;
         int height = 2 * s;
-        TETile tile = getRandomTile();
-        addRow(world, s, x + increments, y, tile);
-        addIntermediateRows(world, s + 2, x + increments - 1, y + 1, height - 4, tile);
-        addMiddleRows(world, rowsAtMiddle, x, y + increments, tile);
-        addRow(world, s, x + increments, y + height - 1, tile);
+        tile = getRandomTile();
+        addRow(s, x + increments, y, height - 2);
+        addIntermediateRows(s + 2, x + increments - 1, y + 1, height - 4);
+        addMiddleRows(rowsAtMiddle, x, y + increments);
     }
-    public static void addRow(TETile[][] world, int numberOfTiles, int startX, int height, TETile tile) {
+    public static void addRow(int numberOfTiles, int startX, int height, int distBtwRows) {
         for (int currX = startX; currX <= startX + numberOfTiles - 1; currX++) {
-            world[currX][height] = tile;
+            HexWorld.world[currX][height] = tile;
+            HexWorld.world[currX][height + distBtwRows + 1] = tile;
         }
     }
-    public static void addIntermediateRows(TETile[][] world, int s, int x, int y, int distanceBetweenIntermediates, TETile tile) {
-        if (distanceBetweenIntermediates == 0) {
+    public static void addIntermediateRows(int s, int x, int y, int distBtwInter) {
+        if (distBtwInter == 0) {
             return;
         }
-        addRow(world, s, x, y, tile);
-        addRow(world, s, x, y + distanceBetweenIntermediates + 1, tile);
-        addIntermediateRows(world, s + 2, x - 1, y + 1, distanceBetweenIntermediates - 2, tile);
+        addRow(s, x, y, distBtwInter);
+        addIntermediateRows(s + 2, x - 1, y + 1, distBtwInter - 2);
     }
-    public static void addMiddleRows(TETile[][] world, int numberOfTiles, int x, int y, TETile tile) {
-        addRow(world, numberOfTiles, x, y, tile);
-        addRow(world, numberOfTiles, x, y + 1, tile);
+    public static void addMiddleRows(int numberOfTiles, int x, int y) {
+        addRow(numberOfTiles, x, y, 0);
     }
     public static TETile getRandomTile() {
         Random rand = new Random();
