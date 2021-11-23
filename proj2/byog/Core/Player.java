@@ -3,7 +3,9 @@ package byog.Core;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
     private int x;
     private int y;
     public Player(Coordinate coordinates) {
@@ -16,8 +18,12 @@ public class Player {
     public int getY() {
         return this.y;
     }
-    public void setX(int x) { this.x = x; }
-    public void setY(int y) { this.y = y; }
+    public void setX(int x) {
+        this.x = x;
+    }
+    public void setY(int y) {
+        this.y = y;
+    }
     public void enterWorld(TETile[][] world) {
         world[this.x][this.y] = Tileset.PLAYER;
     }

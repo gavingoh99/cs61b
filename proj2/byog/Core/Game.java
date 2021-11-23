@@ -1,19 +1,29 @@
 package byog.Core;
 
 import byog.TileEngine.TETile;
+// import the right StdDraw if not
+// you'll encounter problems responding to
+// keyboard inputs with hasNextKeyPressed()
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.awt.*;
+import java.awt.Color;
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import static byog.Core.MapGenerator.HEIGHT;
 import static byog.Core.MapGenerator.WIDTH;
 
 
-public class Game {
+public class Game implements Serializable {
     static Random rand;
     static Player player;
     static TETile[][] world;
+    static int seedSize;
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
@@ -28,7 +38,12 @@ public class Game {
                 long seed = UserInterface.askForSeed();
                 world = playWithInputString(Long.toString(seed));
                 World.renderWorld(world);
-                play(world);
+                play();
+            }
+            if (keyPressed == 'l') {
+                loadGameState();
+                World.renderWorld(world);
+                play();
             }
         }
     }
@@ -46,6 +61,12 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
+        input = input.toLowerCase();
+        if (input.charAt(0) == 'l') {
+            loadGameState();
+            processStringForMovement(input.substring(1));
+            return world;
+        }
         world = World.createEmptyWorld();
         Game.rand = getSeed(input);
         int numberOfRooms = rand.nextInt(15) + 5;
@@ -55,15 +76,40 @@ public class Game {
         player = new Player(PathGenerator.randomCoordinate(rooms[0]));
         player.enterWorld(world);
         MapGenerator.fillAll(world);
+        if (input.length() > seedSize + 2) {
+            processStringForMovement(input.substring(seedSize + 2));
+        }
         return world;
+    }
+    private static void processStringForMovement(String input) {
+        for (int index = 0; index < input.length(); index++) {
+            if (input.charAt(index) == ':') {
+                if (input.charAt(index + 1) == 'q') {
+                    saveGameState();
+                }
+            }
+            if (input.charAt(index) == 'w') {
+                MapGenerator.moveUp(world, player, false);
+            }
+            if (input.charAt(index) == 'a') {
+                MapGenerator.moveLeft(world, player, false);
+            }
+            if (input.charAt(index) == 's') {
+                MapGenerator.moveDown(world, player, false);
+            }
+            if (input.charAt(index) == 'd') {
+                MapGenerator.moveRight(world, player, false);
+            }
+        }
     }
 
     public static Random getSeed(String input) {
         long seed = 0;
-        input = input.toUpperCase();
+        seedSize = 0;
         for (int i = 0; i < input.length(); i++) {
             if (Character.isDigit(input.charAt(i))) {
                 seed = 10 * seed + Long.parseLong("" + input.charAt(i));
+                seedSize++;
             }
         }
         return new Random(seed);
@@ -79,15 +125,15 @@ public class Game {
     public static char waitForControlKey() {
         while (!StdDraw.hasNextKeyTyped()) {
             StdDraw.pause(10);
-            mouseTile();
+            trackMouse();
         }
         return StdDraw.nextKeyTyped();
     }
-    public static void mouseTile() {
+    public static void trackMouse() {
         double x = StdDraw.mouseX();
         double y = StdDraw.mouseY();
-        int w = (int) Math.floorDiv((long) x, 1);
-        int h = (int) Math.floorDiv((long) y, 1);
+        int w = (int) x;
+        int h = (int) y;
         if (h >= HEIGHT) {
             h = HEIGHT - 1;
         }
@@ -97,26 +143,62 @@ public class Game {
         TETile tile = world[w][h];
         StdDraw.setPenColor(Color.BLACK);
         StdDraw.filledRectangle(WIDTH / 2, HEIGHT, WIDTH / 2, 1);
-        StdDraw.setPenColor(Color.PINK);
+        StdDraw.setPenColor(Color.white);
         StdDraw.textLeft(1, HEIGHT, tile.description());
         StdDraw.show();
     }
-    private void play(TETile[][] world) {
+    private void play() {
         while (true) {
             char command = waitForControlKey();
+            if (command == ':') {
+                char followUp = waitForControlKey();
+                if (followUp == 'q') {
+                    saveGameState();
+                    playWithKeyboard();
+                }
+            }
             if (command == 'w') {
-                MapGenerator.moveUp(world, player);
-                System.out.println("hello");
+                MapGenerator.moveUp(world, player, true);
             }
             if (command == 'a') {
-                MapGenerator.moveLeft(world, player);
+                MapGenerator.moveLeft(world, player, true);
             }
             if (command == 's') {
-                MapGenerator.moveDown(world, player);
+                MapGenerator.moveDown(world, player, true);
             }
             if (command == 'd') {
-                MapGenerator.moveRight(world, player);
+                MapGenerator.moveRight(world, player, true);
             }
+        }
+    }
+    private static void saveGameState() {
+        String fileName = "saves.txt";
+        try {
+            FileOutputStream fileStream = new FileOutputStream(fileName);
+            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            objectStream.writeObject(rand);
+            objectStream.writeObject(world);
+            objectStream.writeObject(player);
+            objectStream.close();
+            fileStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private static void loadGameState() {
+        String fileName = "saves.txt";
+        try {
+            FileInputStream fileStream = new FileInputStream(fileName);
+            ObjectInputStream objectStream = new ObjectInputStream(fileStream);
+            rand = (Random) objectStream.readObject();
+            world = (TETile[][]) objectStream.readObject();
+            player = (Player) objectStream.readObject();
+            objectStream.close();
+            fileStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

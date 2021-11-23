@@ -2,7 +2,8 @@ package byog.Core;
 
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Color;
 
 import static byog.Core.MapGenerator.HEIGHT;
 import static byog.Core.MapGenerator.WIDTH;
@@ -26,7 +27,7 @@ public class UserInterface {
     }
 
     public static long askForSeed() {
-        StdDraw.clear(StdDraw.PRINCETON_ORANGE);
+        StdDraw.clear(Color.pink);
         StdDraw.text(WIDTH / 2, HEIGHT * 0.6,
                 "Please enter a seed, or press 'r' for a random seed. Press s to confirm: ");
         StdDraw.show();
@@ -38,7 +39,7 @@ public class UserInterface {
                 break;
             }
             if (Character.isDigit(c)) {
-                StdDraw.clear(StdDraw.PRINCETON_ORANGE);
+                StdDraw.clear(Color.pink);
                 StdDraw.text(WIDTH / 2, HEIGHT * 0.6,
                         "Please enter a seed, or press 'r' for a random seed. "
                                 + "Press s to confirm: ");
@@ -47,13 +48,13 @@ public class UserInterface {
                 StdDraw.text(WIDTH / 2, HEIGHT * 0.5, "Seed: " + seed);
                 StdDraw.show();
             } else {
-                StdDraw.clear(StdDraw.PRINCETON_ORANGE);
+                StdDraw.clear(Color.pink);
                 StdDraw.text(WIDTH / 2, HEIGHT * 0.6,
                         "Please enter a seed, or press 'r' for a random seed. "
                                 + "Press s to confirm: ");
                 StdDraw.show();
                 StdDraw.text(WIDTH / 2, HEIGHT * 0.5, "Seed: " + seed);
-                StdDraw.text( WIDTH / 2, HEIGHT * 0.4, "numbers only pls");
+                StdDraw.text(WIDTH / 2, HEIGHT * 0.4, "Seed can only be composed of numbers");
                 StdDraw.show();
             }
             c = Game.waitCommand();
