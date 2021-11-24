@@ -7,7 +7,7 @@ public class Percolation {
     private int sites;
     private int topIndex;
     private int bottomIndex;
-    private static WeightedQuickUnionUF disjoint;
+    private WeightedQuickUnionUF disjoint;
     public Percolation(int N) {
         if (N <= 0) {
             throw new IllegalArgumentException();
@@ -39,13 +39,13 @@ public class Percolation {
             array[row][col] = 1;
             sites++;
         }
-        if (sites > 1) {
-            int setIndex = getSetIndex(row, col);
-            if (row - 1 >= 0 && isOpen(row - 1, col)) {
-                disjoint.union(setIndex, setIndex - array.length);
-            } else if (row == 0) {
-                disjoint.union(topIndex, setIndex);
-            }
+
+        int setIndex = getSetIndex(row, col);
+        if (row - 1 >= 0 && isOpen(row - 1, col)) {
+            disjoint.union(setIndex, setIndex - array.length);
+        } else if (row == 0) {
+            disjoint.union(topIndex, setIndex);
+        }
             // to be more discriminate, we only connect the bottom row
             // to the bottom virtual site if it is already connected to
             // the top virtual site, this is accomplished
@@ -59,17 +59,16 @@ public class Percolation {
             // a connection to top virtual site unless
             // the site in question already has a connection
             // to it from sites above it
-            if (row + 1 < array.length && isOpen(row + 1, col)) {
-                disjoint.union(setIndex, setIndex + array.length);
-            } else if (row == array.length - 1 && disjoint.find(setIndex) == topIndex) {
-                disjoint.union(bottomIndex, setIndex);
-            }
-            if (col + 1 < array.length && isOpen(row, col + 1)) {
-                disjoint.union(setIndex, setIndex + 1);
-            }
-            if (col - 1 >= 0 && isOpen(row, col - 1)) {
-                disjoint.union(setIndex, setIndex - 1);
-            }
+        if (row + 1 < array.length && isOpen(row + 1, col)) {
+            disjoint.union(setIndex, setIndex + array.length);
+        } else if (row == array.length - 1 && disjoint.find(setIndex) == topIndex) {
+            disjoint.union(bottomIndex, setIndex);
+        }
+        if (col + 1 < array.length && isOpen(row, col + 1)) {
+            disjoint.union(setIndex, setIndex + 1);
+        }
+        if (col - 1 >= 0 && isOpen(row, col - 1)) {
+            disjoint.union(setIndex, setIndex - 1);
         }
     }
     public boolean isOpen(int row, int col) {
@@ -103,18 +102,13 @@ public class Percolation {
     public boolean percolates() {
         return disjoint.connected(topIndex, bottomIndex);
     }
-    public int getSetIndex(int row, int col) {
+    private int getSetIndex(int row, int col) {
         return row * array.length + col;
     }
 
     public static void main(String[] args) {
-        Percolation test = new Percolation(4);
-        test.open(2, 0);
-        test.open(3, 0);
-        test.open(1, 0);
+        Percolation test = new Percolation(1);
         test.open(0, 0);
-        test.open(0, 3);
-        test.open(1, 3);
         System.out.println(test.percolates());
     }
 }

@@ -11,6 +11,9 @@ public class PercolationStats {
     private PercolationFactory sampleMaker;
     private double[] expThreshold;
     public PercolationStats(int N, int T, PercolationFactory pf) {
+        if (N <= 0 || T <= 0) {
+            throw new IllegalArgumentException();
+        }
         lengthOfGrid = N;
         numberOfExperiments = T;
         sampleMaker = pf;
