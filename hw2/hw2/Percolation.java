@@ -46,22 +46,9 @@ public class Percolation {
         } else if (row == 0) {
             disjoint.union(topIndex, setIndex);
         }
-            // to be more discriminate, we only connect the bottom row
-            // to the bottom virtual site if it is already connected to
-            // the top virtual site, this is accomplished
-            // by first connecting the bottom row to potentially any
-            // sites above it to complete the connection
-            // to top virtual site
-            // then checking for the connection to top site
-            // as part of the conditional, and only connecting
-            // if the connection already exists
-            // this means that we won't be adding
-            // a connection to top virtual site unless
-            // the site in question already has a connection
-            // to it from sites above it
         if (row + 1 < array.length && isOpen(row + 1, col)) {
             disjoint.union(setIndex, setIndex + array.length);
-        } else if (row == array.length - 1 && disjoint.find(setIndex) == topIndex) {
+        } else if (row == array.length - 1) {
             disjoint.union(bottomIndex, setIndex);
         }
         if (col + 1 < array.length && isOpen(row, col + 1)) {
@@ -107,8 +94,31 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
-        Percolation test = new Percolation(1);
-        test.open(0, 0);
+        // 0 0 0 0 0 1
+        // 1 1 1 1 0 1
+        // 1 0 0 1 0 1
+        // 1 0 0 1 0 1
+        // 1 1 0 1 1 1
+        // 0 1 0 0 0 0
+        Percolation test = new Percolation(6);
+        test.open(0, 5);
+        test.open(1, 5);
+        test.open(2, 5);
+        test.open(3, 5);
+        test.open(4, 5);
+        test.open(4, 4);
+        test.open(3, 3);
+        test.open(2, 3);
+        test.open(1, 3);
+        test.open(1, 2);
+        test.open(1, 1);
+        test.open(1, 0);
+        test.open(2, 0);
+        test.open(3, 0);
+        test.open(4, 0);
+        test.open(4, 1);
+        test.open(5, 1);
+        test.open(4, 3);
         System.out.println(test.percolates());
     }
 }
