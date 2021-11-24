@@ -16,15 +16,18 @@ public class PercolationStats {
         numberOfExperiments = T;
         sampleMaker = pf;
         expThreshold = new double[numberOfExperiments];
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < numberOfExperiments; i++) {
             Percolation sample = sampleMaker.make(lengthOfGrid);
             expThreshold[i] = doExperiment(sample, lengthOfGrid);
         }
     }
     private double doExperiment(Percolation p, int N) {
         while (!p.percolates()) {
-            int row = StdRandom.uniform(0, N);
-            int col = StdRandom.uniform(0, N);
+            int row = StdRandom.uniform(N);
+            int col = StdRandom.uniform(N);
+            if (p.isOpen(row, col)) {
+                continue;
+            }
             p.open(row, col);
         }
         return (double) p.numberOfOpenSites() / (N * N);
