@@ -31,7 +31,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
 
     /* Creates an empty BSTMap. */
     public BSTMap() {
-
+        this.clear();
     }
 
     /* Removes all of the mappings from this map. */
@@ -50,13 +50,10 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
         }
         if (p.key.equals(key)) {
             return p.value;
-        }
-        V valueLeft = getHelper(key, p.left);
-        V valueRight = getHelper(key, p.right);
-        if (valueLeft != null) {
-            return valueLeft;
+        } else if (key.compareTo(p.key) > 0) {
+            return getHelper(key, p.right);
         } else {
-            return valueRight;
+            return getHelper(key, p.left);
         }
     }
 
@@ -104,9 +101,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
         test.put("hello", 5);
         test.put("hi", 3);
         test.put("no", 1);
-        for (String key: test) {
-            System.out.println(key);
-        }
+        test.remove("hello");
+        System.out.println(test.containsKey("no"));
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
@@ -131,26 +127,59 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
      *  returns VALUE removed,
      *  null on failed removal.
      */
-    //TODO see if there is a more convenient way to fuse remove(key) and remove(key, value)
     private V keyFinder(K key, Node p) {
         if (p == null) {
             return null;
         }
         if (p.left != null && p.left.key.equals(key)) {
-            V value = p.left.value;
-            p.left = null;
-            return value;
+            // if left child is the key, check for children
+            // no children just remove node and sever connection from parent
+            if (p.left.left == null && p.left.right == null) {
+                V value = p.left.value;
+                p.left = null;
+                return value;
+            // 1 child we have to preserve the connection from grandparent to child
+            } else if (p.left.left == null || p.left.right == null) {
+                V value = p.left.value;
+                // if right child is present we link grandparent to right grandchild else left grandchild
+                if (p.left.left == null) {
+                    p.left = p.left.right;
+                } else {
+                    p.left = p.left.left;
+                }
+                return value;
+            // both children are around then we must decide on a successor
+            } else {
+                Node toBeRemoved = findSuccessorAndReplace(p.left);
+                return toBeRemoved.value;
+            }
         } else if (p.right != null && p.right.key.equals(key)) {
-            V value = p.right.value;
-            p.right = null;
-            return value;
+            // if left child is the key, check for children
+            // no children just remove node and sever connection from parent
+            if (p.right.left == null && p.right.right == null) {
+                V value = p.right.value;
+                p.right = null;
+                return value;
+                // 1 child we have to preserve the connection from grandparent to child
+            } else if (p.right.left == null || p.right.right == null) {
+                V value = p.right.value;
+                // if right child is present we link grandparent to right grandchild else left grandchild
+                if (p.right.left == null) {
+                    p.right = p.right.right;
+                } else {
+                    p.right = p.right.left;
+                }
+                return value;
+                // both children are around then we must decide on a successor
+            } else {
+                Node toBeRemoved = findSuccessorAndReplace(p.right);
+                return toBeRemoved.value;
+            }
         }
-        V valueLeft = keyFinder(key, p.left);
-        V valueRight = keyFinder(key, p.right);
-        if (valueLeft != null) {
-            return valueLeft;
+        if (key.compareTo(p.key) > 0) {
+            return keyFinder(key, p.right);
         } else {
-            return valueRight;
+            return keyFinder(key, p.left);
         }
     }
     private Node findSmallestNode(Node p) {
@@ -198,88 +227,50 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
     @Override
     public V remove(K key) {
         if (root.key.equals(key)) {
-            Node left = root.left;
-            Node right = root.right;
-            Node successor = null;
-            if (left != null) {
-                successor = findLargestNode(left);
-            } else if (right != null) {
-                successor = findSmallestNode(right);
-            } else {
+            if (root.left == null && root.right == null) {
                 V value = root.value;
                 root = null;
                 return value;
+            } else if (root.left == null) {
+                V value = root.value;
+                root = root.right;
+                return value;
+            } else if (root.right == null) {
+                V value = root.value;
+                root = root.left;
+                return value;
+            } else {
+                Node toBeRemoved = findSuccessorAndReplace(root);
+                return toBeRemoved.value;
             }
-            successor.left = left;
-            successor.right = right;
-            Node toBeRemoved = root;
-            toBeRemoved.left = null;
-            toBeRemoved.right = null;
-            root = successor;
-            return toBeRemoved.value;
         }
         return keyFinder(key, root);
+    }
+    // finds successor to replace the given node with two children, then
+    // after severing everything we return the initial node
+    private Node findSuccessorAndReplace(Node p) {
+        Node left = p.left;
+        Node right = p.right;
+        Node successor = findSmallestNode(left);
+        successor.left = left;
+        successor.right = right;
+        Node toBeRemoved = p;
+        p = successor;
+        return toBeRemoved;
     }
 
     /** Removes the key-value entry for the specified key only if it is
      *  currently mapped to the specified value.  Returns the VALUE removed,
      *  null on failed removal.
      **/
-    private V keyFinder(K key, V value, Node p) {
-        if (p == null) {
-            return null;
-        }
-        if (p.left != null && p.left.key.equals(key)) {
-            V valueOfKey = p.left.value;
-            if (valueOfKey.equals(value)) {
-                p.left = null;
-                return value;
-            }
-            return null;
-        } else if (p.right != null && p.right.key.equals(key)) {
-            V valueOfKey = p.right.value;
-            if (valueOfKey.equals(value)) {
-                p.right = null;
-                return value;
-            }
-        }
-        V valueLeft = keyFinder(key, p.left);
-        V valueRight = keyFinder(key, p.right);
-        if (valueLeft != null) {
-            return valueLeft;
-        } else {
-            return valueRight;
-        }
-    }
+
 
     @Override
     public V remove(K key, V value) {
-        if (!root.key.equals(key)) {
-            return keyFinder(key, value, root);
-        }
-        if (root.value.equals(value)) {
-            Node left = root.left;
-            Node right = root.right;
-            Node successor = null;
-            if (left != null) {
-                successor = findLargestNode(left);
-            } else if (right != null) {
-                successor = findSmallestNode(right);
-            } else {
-                V valueOfKey = root.value;
-                root = null;
-                return value;
-            }
-            successor.left = left;
-            successor.right = right;
-            Node toBeRemoved = root;
-            toBeRemoved.left = null;
-            toBeRemoved.right = null;
-            root = successor;
-            return toBeRemoved.value;
-        } else {
+        if (!get(key).equals(value)) {
             return null;
         }
+        return remove(key);
     }
 
     @Override
