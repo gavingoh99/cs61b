@@ -9,7 +9,7 @@ import java.util.Set;
  *
  * @author Your name here
  */
-public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterable<K> {
+public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     private class Node {
         /* (K, V) pair stored in this Node. */
@@ -48,12 +48,13 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
         if (p == null) {
             return null;
         }
-        if (p.key.equals(key)) {
+        int cmp = key.compareTo(p.key);
+        if (cmp == 0) {
             return p.value;
-        } else if (key.compareTo(p.key) > 0) {
-            return getHelper(key, p.right);
-        } else {
+        } else if (cmp < 0) {
             return getHelper(key, p.left);
+        } else {
+            return getHelper(key, p.right);
         }
     }
 
@@ -62,23 +63,25 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
      */
     @Override
     public V get(K key) {
+        assert key != null;
         return getHelper(key, root);
     }
 
     /** Returns a BSTMap rooted in p with (KEY, VALUE) added as a key-value mapping.
-      * Or if p is null, it returns a one node BSTMap containing (KEY, VALUE).
+     * Or if p is null, it returns a one node BSTMap containing (KEY, VALUE).
      */
     private Node putHelper(K key, V value, Node p) {
         if (p == null) {
-            size++;
+            size += 1;
             return new Node(key, value);
         }
-        if (key.compareTo(p.key) > 0) {
-            p.right = putHelper(key, value, p.right);
-        } else if (key.compareTo(p.key) < 0) {
+        int cmp = key.compareTo(p.key);
+        if (cmp == 0) {
+            p.value = value;
+        } else if (cmp < 0) {
             p.left = putHelper(key, value, p.left);
         } else {
-            p.value = value;
+            p.right = putHelper(key, value, p.right);
         }
         return p;
     }
@@ -88,108 +91,98 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
      */
     @Override
     public void put(K key, V value) {
+        assert key != null;
         root = putHelper(key, value, root);
     }
 
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        return this.size;
-    }
-    public static void main(String[] args) {
-        BSTMap<String, Integer> test = new BSTMap<>();
-        test.put("hello", 5);
-        test.put("a", 3);
-        test.put("no", 1);
-        test.remove("hello");
-        System.out.println(test.size());
-        System.out.println(test.containsKey("no"));
+        return size;
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
 
-    /* Returns a Set view of the keys contained in this map. */
-    private void setAdder(Set set, Node p) {
-        if (p == null) {
+    private void keySetHelper(Set<K> set, Node node) {
+        if (node == null) {
             return;
         }
-        set.add(p.key);
-        setAdder(set, p.left);
-        setAdder(set, p.right);
+        keySetHelper(set, node.left);
+        set.add(node.key);
+        keySetHelper(set, node.right);
     }
+
+    /* Returns a Set view of the keys contained in this map. */
     @Override
     public Set<K> keySet() {
         Set<K> keySet = new HashSet<>();
-        setAdder(keySet, root);
+        keySetHelper(keySet, root);
         return keySet;
+    }
+
+    private Node findMinNode(Node node) {
+        if (node.left == null) {
+            return node;
+        }
+        return findMinNode(node.left);
+    }
+
+    // Traverse tree to find min node, then update
+    // tree such that pointer to min node is
+    // replaced to pointer to min node's right child
+    // either null value or a node instance
+    private Node updateBranch(Node node) {
+        if (node.left == null) {
+            return node.right;
+        }
+        node.left = updateBranch(node.left);
+        return node;
+    }
+
+    private Node update(K key, Node node) {
+        if (node == null) {
+            return null;
+        }
+
+        int cmp = key.compareTo(node.key);
+        if (cmp < 0) {
+            node.left = update(key, node.left);
+        } else if (cmp > 0) {
+            node.right = update(key, node.right);
+        } else {
+            if (node.left == null) {
+                return node.right;
+            }
+            if (node.right == null) {
+                return node.left;
+            }
+            Node t = node;
+            node = findMinNode(t.right);
+            node.right = updateBranch(t.right);
+            node.left = t.left;
+        }
+        return node;
     }
 
     /** Removes KEY from the tree if present
      *  returns VALUE removed,
      *  null on failed removal.
      */
-    private Node update(K key, Node p) {
-        if (p == null) {
-            return null;
-        }
-        if (key.compareTo(p.key) > 0) {
-            p.right = update(key, p.right);
-        } else if (key.compareTo(p.key) < 0) {
-            p.left = update(key, p.left);
-        } else {
-            if (p.left == null) {
-                return p.right;
-            }
-            if (p.right == null) {
-                return p.left;
-            }
-            Node toBeRemoved = p;
-            p = findSmallestNode(p.right);
-            p.left = toBeRemoved.left;
-            // remove the smallest node from the right side of
-            // the initial BST
-            p.right = removeSuccessorFrom(toBeRemoved.right);
-        }
-        return p;
-    }
-    // given a node, we traverse the tree in search of the
-    // smallest node then we remove it from the branch
-    private Node removeSuccessorFrom(Node p) {
-        // once we've reached the smallest node
-        // set the connection of parent to this node
-        // to be the value of the smallest node's right child
-        // either null or an actual node
-        if (p.left == null) {
-            return p.right;
-        }
-        p.left = removeSuccessorFrom(p.left);
-        return p;
-    }
-    private Node findSmallestNode(Node p) {
-        if (p.left == null) {
-            return p;
-        }
-        return findSmallestNode(p.left);
-    }
-
     @Override
     public V remove(K key) {
         if (!containsKey(key)) {
             return null;
         }
         V value = get(key);
-        size--;
+        size -= 1;
         root = update(key, root);
         return value;
     }
-
 
     /** Removes the key-value entry for the specified key only if it is
      *  currently mapped to the specified value.  Returns the VALUE removed,
      *  null on failed removal.
      **/
-
-
     @Override
     public V remove(K key, V value) {
         if (get(key) != value) {
