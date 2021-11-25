@@ -115,9 +115,9 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     /* Returns a Set view of the keys contained in this map. */
     @Override
     public Set<K> keySet() {
-        Set<K> keySet = new HashSet<>();
-        keySetHelper(keySet, root);
-        return keySet;
+        Set<K> keyset = new HashSet<>();
+        keySetHelper(keyset, root);
+        return keyset;
     }
 
     private Node findMinNode(Node node) {
@@ -127,10 +127,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return findMinNode(node.left);
     }
 
-    // Traverse tree to find min node, then update
-    // tree such that pointer to min node is
-    // replaced to pointer to min node's right child
-    // either null value or a node instance
     private Node updateBranch(Node node) {
         if (node.left == null) {
             return node.right;
