@@ -128,147 +128,66 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
      *  returns VALUE removed,
      *  null on failed removal.
      */
-    private V keyFinder(K key, Node p) {
+    private Node update(K key, Node p) {
         if (p == null) {
             return null;
         }
-        if (p.left != null && p.left.key.equals(key)) {
-            // if left child is the key, check for children
-            // no children just remove node and sever connection from parent
-            if (p.left.left == null && p.left.right == null) {
-                V value = p.left.value;
-                p.left = null;
-                size--;
-                return value;
-            // 1 child we have to preserve the connection from grandparent to child
-            } else if (p.left.left == null || p.left.right == null) {
-                V value = p.left.value;
-                // if right child is present link grandparent to right grandchild
-                if (p.left.left == null) {
-                    p.left = p.left.right;
-                } else {
-                    p.left = p.left.left;
-                }
-                size--;
-                return value;
-            // both children are around then we must decide on a successor
-            } else {
-                Node toBeRemoved = findSuccessorAndReplace(p.left);
-                size--;
-                return toBeRemoved.value;
-            }
-        } else if (p.right != null && p.right.key.equals(key)) {
-            // if left child is the key, check for children
-            // no children just remove node and sever connection from parent
-            if (p.right.left == null && p.right.right == null) {
-                V value = p.right.value;
-                p.right = null;
-                size--;
-                return value;
-                // 1 child we have to preserve the connection from grandparent to child
-            } else if (p.right.left == null || p.right.right == null) {
-                V value = p.right.value;
-                // if right child is present we link grandparent to right grandchild
-                if (p.right.left == null) {
-                    p.right = p.right.right;
-                } else {
-                    p.right = p.right.left;
-                }
-                size--;
-                return value;
-                // both children are around then we must decide on a successor
-            } else {
-                Node toBeRemoved = findSuccessorAndReplace(p.right);
-                size--;
-                return toBeRemoved.value;
-            }
-        }
         if (key.compareTo(p.key) > 0) {
-            return keyFinder(key, p.right);
+            p.right = update(key, p.right);
+        } else if (key.compareTo(p.key) < 0) {
+            p.left = update(key, p.left);
         } else {
-            return keyFinder(key, p.left);
+            if (p.left == null) {
+                return p.right;
+            }
+            if (p.right == null) {
+                return p.left;
+            }
+                //    4
+                //   / \
+                //  2   3
+                //     / \
+                //    7   5
+            Node toBeRemoved = p;
+            p = findSmallestNode(p.right);
+            p.left = toBeRemoved.left;
+            // remove the smallest node from the right side of
+            // the initial BST
+            p.right = removeSuccessorFrom(p.right);
         }
+        return p;
+    }
+    // given a node, we traverse the tree in search of the
+    // smallest node then we remove it from the branch
+    private Node removeSuccessorFrom(Node p) {
+        // once we've reached the smallest node
+        // set the connection of parent to this node
+        // to be the value of the smallest node's right child
+        // either null or an actual node
+        if (p.left == null) {
+            return p.right;
+        }
+        p.left = removeSuccessorFrom(p.left);
+        return p;
     }
     private Node findSmallestNode(Node p) {
-        Node currNode = p;
-        Node prevNode = root;
-        while (true) {
-            // node has no children
-            if (currNode.left == null && currNode.right == null) {
-                if (currNode == p) {
-                    return currNode;
-                }
-                prevNode.left = null;
-                return currNode;
-            }
-            // node has one child - left branch which is less than this node
-            if (currNode.left == null) {
-                prevNode.left = currNode.right;
-                return currNode;
-            }
-            prevNode = currNode;
-            currNode = currNode.left;
+        if (p.left == null) {
+            return p;
         }
+        return findSmallestNode(p.left);
     }
-    private Node findLargestNode(Node p) {
-        Node currNode = p;
-        Node prevNode = root;
-        while (true) {
-            // node has no children
-            if (currNode.left == null && currNode.right == null) {
-                if (currNode == p) {
-                    return currNode;
-                }
-                prevNode.right = null;
-                return currNode;
-            }
-            // node has one child - left branch which is less than this node
-            if (currNode.right == null) {
-                prevNode.right = currNode.left;
-                return currNode;
-            }
-            prevNode = currNode;
-            currNode = currNode.right;
-        }
-    }
+
     @Override
     public V remove(K key) {
-        if (root.key.equals(key)) {
-            if (root.left == null && root.right == null) {
-                V value = root.value;
-                root = null;
-                size--;
-                return value;
-            } else if (root.left == null) {
-                V value = root.value;
-                root = root.right;
-                size--;
-                return value;
-            } else if (root.right == null) {
-                V value = root.value;
-                root = root.left;
-                size--;
-                return value;
-            } else {
-                Node toBeRemoved = findSuccessorAndReplace(root);
-                size--;
-                return toBeRemoved.value;
-            }
+        if (!containsKey(key)) {
+            return null;
         }
-        return keyFinder(key, root);
+        V value = get(key);
+        size--;
+        root = update(key, root);
+        return value;
     }
-    // finds successor to replace the given node with two children, then
-    // after severing everything we return the initial node
-    private Node findSuccessorAndReplace(Node p) {
-        Node left = p.left;
-        Node right = p.right;
-        Node successor = findLargestNode(left);
-        successor.left = left;
-        successor.right = right;
-        Node toBeRemoved = p;
-        p = successor;
-        return toBeRemoved;
-    }
+
 
     /** Removes the key-value entry for the specified key only if it is
      *  currently mapped to the specified value.  Returns the VALUE removed,

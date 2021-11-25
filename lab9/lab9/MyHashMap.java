@@ -77,21 +77,17 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
     }
     private void resize() {
         // create new buckets
-        ArrayMap<K, V>[] newBuckets = new ArrayMap[buckets.length * 2];
+        ArrayMap<K, V>[] oldBuckets = buckets;
+        buckets = new ArrayMap[buckets.length * 2];
+        clear();
         // iterate over existing buckets and recalculate hash
-        for (ArrayMap<K, V> bucket: buckets) {
-            if (bucket != null) {
-                for (K existingKey : bucket) {
-                    int hash = hash(existingKey);
-                    // create a bucket to take key-value pairs if there doesn't already exist one
-                    if (newBuckets[hash] == null) {
-                        newBuckets[hash] = new ArrayMap<>();
-                    }
-                    newBuckets[hash].put(existingKey, bucket.get(existingKey));
-                }
+        for (ArrayMap<K, V> bucket: oldBuckets) {
+            for (K existingKey : bucket.keySet()) {
+                int hash = hash(existingKey);
+                buckets[hash].put(existingKey, bucket.get(existingKey));
+                size++;
             }
         }
-        buckets = newBuckets;
     }
     /* Returns the number of key-value mappings in this map. */
     @Override
@@ -126,7 +122,7 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
         if (!containsKey(key)) {
             return null;
         }
-        this.size--;
+        size--;
         return buckets[hash(key)].remove(key);
     }
 
