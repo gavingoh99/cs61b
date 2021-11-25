@@ -3,6 +3,9 @@ package hw2;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
+    // TODO figure out how to use byte array to solve the backwash problem
+    // Instead of using two WQUF
+    // https://github.com/SawyerSun/Algorithms-and-Data-Structures/blob/master/coursera-algorithms-princeton/src/main/java/one/Percolation.java
     private boolean[][] array;
     private int sites;
     private int topIndex;

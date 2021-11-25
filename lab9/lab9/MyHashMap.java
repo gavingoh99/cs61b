@@ -1,5 +1,6 @@
 package lab9;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import java.util.Set;
  *
  *  @author Your name here
  */
-public class MyHashMap<K, V> implements Map61B<K, V> {
+public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
 
     private static final int DEFAULT_SIZE = 16;
     private static final double MAX_LF = 0.75;
@@ -53,19 +54,47 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      */
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        ArrayMap<K, V> bucket = buckets[hash(key)];
+        return bucket.get(key);
     }
 
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (loadFactor() > MAX_LF) {
+            // create new buckets
+            ArrayMap<K, V>[] newBuckets = new ArrayMap[buckets.length * 2];
+            // iterate over existing buckets and recalculate hash, some buckets may be empty from removing
+            for (ArrayMap<K, V> bucket: buckets) {
+                if (bucket != null) {
+                    for (K existingKey : bucket) {
+                        int hash = hash(existingKey);
+                        // create a bucket to take key-value pairs if there doesn't already exist one
+                        if (newBuckets[hash] == null) {
+                            newBuckets[hash] = new ArrayMap<>();
+                        }
+                        newBuckets[hash].put(existingKey, bucket.get(existingKey));
+                    }
+                }
+            }
+            buckets = newBuckets;
+        }
+        int hash = hash(key);
+        if (buckets[hash] == null) {
+            buckets[hash] = new ArrayMap<>();
+        }
+        // if bucket already contains key, we are merely replacing
+        // only increase size if we are adding not replacing
+        if (!buckets[hash].containsKey(key)) {
+            size++;
+        }
+        buckets[hash].put(key, value);
     }
 
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return size;
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
@@ -73,7 +102,11 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     /* Returns a Set view of the keys contained in this map. */
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException();
+        Set<K> keySet = new HashSet<>();
+        for (ArrayMap<K, V> bucket: buckets) {
+            keySet.addAll(bucket.keySet());
+        }
+        return keySet;
     }
 
     /* Removes the mapping for the specified key from this map if exists.
@@ -81,7 +114,11 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * UnsupportedOperationException. */
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        int hash = hash(key);
+        if (buckets[hash] == null) {
+            return null;
+        }
+        return buckets[hash].remove(key);
     }
 
     /* Removes the entry for the specified key only if it is currently mapped to
@@ -89,11 +126,15 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * throw an UnsupportedOperationException.*/
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        int hash = hash(key);
+        if (buckets[hash] == null) {
+            return null;
+        }
+        return buckets[hash].remove(key, value);
     }
 
     @Override
     public Iterator<K> iterator() {
-        throw new UnsupportedOperationException();
+        return keySet().iterator();
     }
 }
