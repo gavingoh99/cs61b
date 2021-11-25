@@ -78,7 +78,7 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
     private void resize() {
         // create new buckets
         ArrayMap<K, V>[] newBuckets = new ArrayMap[buckets.length * 2];
-        // iterate over existing buckets and recalculate hash, some buckets may be empty from removing
+        // iterate over existing buckets and recalculate hash
         for (ArrayMap<K, V> bucket: buckets) {
             if (bucket != null) {
                 for (K existingKey : bucket) {

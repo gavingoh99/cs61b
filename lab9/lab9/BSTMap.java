@@ -141,7 +141,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
             // 1 child we have to preserve the connection from grandparent to child
             } else if (p.left.left == null || p.left.right == null) {
                 V value = p.left.value;
-                // if right child is present we link grandparent to right grandchild else left grandchild
+                // if right child is present link grandparent to right grandchild
                 if (p.left.left == null) {
                     p.left = p.left.right;
                 } else {
@@ -163,7 +163,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
                 // 1 child we have to preserve the connection from grandparent to child
             } else if (p.right.left == null || p.right.right == null) {
                 V value = p.right.value;
-                // if right child is present we link grandparent to right grandchild else left grandchild
+                // if right child is present we link grandparent to right grandchild
                 if (p.right.left == null) {
                     p.right = p.right.right;
                 } else {
