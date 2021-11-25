@@ -143,17 +143,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
             if (p.right == null) {
                 return p.left;
             }
-                //    4
-                //   / \
-                //  2   3
-                //     / \
-                //    7   5
             Node toBeRemoved = p;
             p = findSmallestNode(p.right);
             p.left = toBeRemoved.left;
             // remove the smallest node from the right side of
             // the initial BST
-            p.right = removeSuccessorFrom(p.right);
+            p.right = removeSuccessorFrom(toBeRemoved.right);
         }
         return p;
     }
@@ -197,7 +192,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
 
     @Override
     public V remove(K key, V value) {
-        if (!get(key).equals(value)) {
+        if (get(key) != value) {
             return null;
         }
         return remove(key);
