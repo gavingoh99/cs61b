@@ -99,7 +99,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
     public static void main(String[] args) {
         BSTMap<String, Integer> test = new BSTMap<>();
         test.put("hello", 5);
-        test.put("hi", 3);
+        test.put("a", 3);
         test.put("no", 1);
         test.remove("hello");
         System.out.println(test.containsKey("no"));
@@ -137,6 +137,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
             if (p.left.left == null && p.left.right == null) {
                 V value = p.left.value;
                 p.left = null;
+                size--;
                 return value;
             // 1 child we have to preserve the connection from grandparent to child
             } else if (p.left.left == null || p.left.right == null) {
@@ -147,10 +148,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
                 } else {
                     p.left = p.left.left;
                 }
+                size--;
                 return value;
             // both children are around then we must decide on a successor
             } else {
                 Node toBeRemoved = findSuccessorAndReplace(p.left);
+                size--;
                 return toBeRemoved.value;
             }
         } else if (p.right != null && p.right.key.equals(key)) {
@@ -159,6 +162,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
             if (p.right.left == null && p.right.right == null) {
                 V value = p.right.value;
                 p.right = null;
+                size--;
                 return value;
                 // 1 child we have to preserve the connection from grandparent to child
             } else if (p.right.left == null || p.right.right == null) {
@@ -169,10 +173,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
                 } else {
                     p.right = p.right.left;
                 }
+                size--;
                 return value;
                 // both children are around then we must decide on a successor
             } else {
                 Node toBeRemoved = findSuccessorAndReplace(p.right);
+                size--;
                 return toBeRemoved.value;
             }
         }
@@ -230,17 +236,21 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
             if (root.left == null && root.right == null) {
                 V value = root.value;
                 root = null;
+                size--;
                 return value;
             } else if (root.left == null) {
                 V value = root.value;
                 root = root.right;
+                size--;
                 return value;
             } else if (root.right == null) {
                 V value = root.value;
                 root = root.left;
+                size--;
                 return value;
             } else {
                 Node toBeRemoved = findSuccessorAndReplace(root);
+                size--;
                 return toBeRemoved.value;
             }
         }
