@@ -102,6 +102,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
         test.put("a", 3);
         test.put("no", 1);
         test.remove("hello");
+        System.out.println(test.size());
         System.out.println(test.containsKey("no"));
     }
 
@@ -261,7 +262,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
     private Node findSuccessorAndReplace(Node p) {
         Node left = p.left;
         Node right = p.right;
-        Node successor = findSmallestNode(left);
+        Node successor = findLargestNode(left);
         successor.left = left;
         successor.right = right;
         Node toBeRemoved = p;
