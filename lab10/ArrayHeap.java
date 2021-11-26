@@ -241,7 +241,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         // Iterate over the contents array
         // check for equality
         // update priority then break
-        for (int index = 1; index < size; index++) {
+        for (int index = 1; index <= size; index++) {
             if (contents[index].item().equals(item)) {
                 contents[index].myPriority = priority;
                 break;
@@ -485,10 +485,10 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         pq.insert("c", 3);
         pq.insert("a", 5);
         pq.insert("b", 7);
-        assertEquals("c", pq.peek());
-        pq.changePriority("c", 10);
-        pq.sink(1);
-        assertEquals("a", pq.peek());
+        System.out.println(pq);
+        pq.changePriority("b", 1);
+        pq.changePriority("a", 2);
+        System.out.println(pq);
     }
 
     @Test

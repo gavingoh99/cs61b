@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 
-import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,21 +24,17 @@ public class TestSimpleOomage {
 
     @Test
     public void testHashCodePerfect() {
-        /* TODO: Write a test that ensures the hashCode is perfect,
-          meaning no two SimpleOomages should EVER have the same
-          hashCode UNLESS they have the same red, blue, and green values!
-         */
-        List<SimpleOomage> listOfOomages = new ArrayList<>();
+        List<SimpleOomage> oomages = new ArrayList<>();
         for (int r = 0; r <= 255; r += 5) {
             for (int g = 0; g <= 255; g += 5) {
                 for (int b = 0; b <= 255; b += 5) {
-                    listOfOomages.add(new SimpleOomage(r, g, b));
+                    oomages.add(new SimpleOomage(r, g, b));
                 }
             }
         }
-        for (int index = 0; index < listOfOomages.size(); index++) {
-            for (int i = index + 1; i < listOfOomages.size(); i++) {
-                assertNotEquals(listOfOomages.get(index).hashCode(), listOfOomages.get(i).hashCode());
+        for (int index = 0; index < oomages.size(); index++) {
+            for (int i = index + 1; i < oomages.size(); i++) {
+                assertNotEquals(oomages.get(index).hashCode(), oomages.get(i).hashCode());
             }
         }
     }
