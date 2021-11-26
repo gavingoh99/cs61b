@@ -9,7 +9,7 @@ import java.util.Set;
  *
  * @author Your name here
  */
-public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
+public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterable<K> {
 
     private class Node {
         /* (K, V) pair stored in this Node. */
@@ -119,14 +119,17 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         keySetHelper(keyset, root);
         return keyset;
     }
-
+    // Traverse a tree till we reach the left most node in the bottom row
     private Node findMinNode(Node node) {
         if (node.left == null) {
             return node;
         }
         return findMinNode(node.left);
     }
-
+    // Traverse a tree till we reach the min node then
+    // update parent pointer to the node
+    // to point at min node's right child
+    // either null value or a node instance
     private Node updateBranch(Node node) {
         if (node.left == null) {
             return node.right;
@@ -139,7 +142,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         if (node == null) {
             return null;
         }
-
+        // traverse bst using compareTo
+        // and update subtrees accordingly
         int cmp = key.compareTo(node.key);
         if (cmp < 0) {
             node.left = update(key, node.left);
@@ -171,6 +175,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         }
         V value = get(key);
         size -= 1;
+        // traverse bst, remove key-value pair
+        // update root pointer to reflect changes in bst
         root = update(key, root);
         return value;
     }
