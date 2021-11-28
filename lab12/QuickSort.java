@@ -71,9 +71,11 @@ public class QuickSort {
         Queue<Item> equal = new Queue<>();
         Queue<Item> greater = new Queue<>();
         partition(items, pivot, less, equal, greater);
-        quickSort(less);
-        quickSort(equal);
-        quickSort(greater);
+        if (!less.isEmpty() && !greater.isEmpty()) {
+            quickSort(less);
+            quickSort(equal);
+            quickSort(greater);
+        }
         Queue<Item> lessAndEqual = catenate(less, equal);
         Queue<Item> result = catenate(lessAndEqual, greater);
         return result;
@@ -81,10 +83,10 @@ public class QuickSort {
 
     public static void main(String[] args) {
         Queue<String> unsorted = new Queue<>();
-        unsorted.enqueue("Alice");
-        unsorted.enqueue("Vanessa");
-        unsorted.enqueue("Ethan");
         unsorted.enqueue("Banana");
+        unsorted.enqueue("Alice");
+        unsorted.enqueue("Banana");
+        unsorted.enqueue("Alice");
         System.out.println(unsorted);
         Queue<String> sorted = QuickSort.quickSort(unsorted);
         System.out.println(unsorted);
