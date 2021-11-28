@@ -71,24 +71,30 @@ public class QuickSort {
         Queue<Item> equal = new Queue<>();
         Queue<Item> greater = new Queue<>();
         partition(items, pivot, less, equal, greater);
-        if (!less.isEmpty() && !greater.isEmpty()) {
-            quickSort(less);
-            quickSort(equal);
-            quickSort(greater);
-        }
+        // no need to quicksort the equal partition
+        // remember to store the new sorted less and greater
+        // queues
+        less = quickSort(less);
+        greater = quickSort(greater);
         Queue<Item> lessAndEqual = catenate(less, equal);
         Queue<Item> result = catenate(lessAndEqual, greater);
         return result;
     }
 
     public static void main(String[] args) {
-        Queue<String> unsorted = new Queue<>();
-        unsorted.enqueue("Banana");
-        unsorted.enqueue("Alice");
-        unsorted.enqueue("Banana");
-        unsorted.enqueue("Alice");
+        Queue<Integer> unsorted = new Queue<>();
+        unsorted.enqueue(0);
+        unsorted.enqueue(3);
+        unsorted.enqueue(4);
+        unsorted.enqueue(4);
+        unsorted.enqueue(5);
+        unsorted.enqueue(5);
+        unsorted.enqueue(6);
+        unsorted.enqueue(6);
+        unsorted.enqueue(8);
+        unsorted.enqueue(6);
         System.out.println(unsorted);
-        Queue<String> sorted = QuickSort.quickSort(unsorted);
+        Queue<Integer> sorted = QuickSort.quickSort(unsorted);
         System.out.println(unsorted);
         System.out.println(sorted);
     }
