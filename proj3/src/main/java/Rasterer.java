@@ -76,25 +76,18 @@ public class Rasterer {
         double userLDPP = (lrlon - ullon) / params.get("w");
         // compare with LDPP of tiles
         // ldpp of 0th level of zoom
-        double LDPP = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / 256;
+        double currLDPP = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / 256;
         int depth = 0;
         boolean foundRightTiles = false;
         while (!foundRightTiles) {
-            // londpp of tile must be less than or equal to user
-            // else if user londpp lower than depth 7
-            // use depth 7 as the default
-            if (LDPP <= userLDPP || depth == 7) {
+            if (currLDPP <= userLDPP || depth == 7) {
                 foundRightTiles = true;
                 break;
             }
             // ldpp of next level of zoom;
-            LDPP = LDPP / 2;
+            currLDPP = currLDPP / 2;
             depth++;
         }
-        // find the interval dist,
-        // depth 0 has 1 x 1 grid, 1 has 2 x 2 grid, 2 has 4 x 4 grid
-        // number of grids per axis is 2^depth
-
         double lonIntervalDist = (MapServer.ROOT_ULLON - MapServer.ROOT_LRLON) / Math.pow(2, depth);
         double latIntervalDist = (MapServer.ROOT_ULLAT - MapServer.ROOT_LRLAT) / Math.pow(2, depth);
 
@@ -103,29 +96,14 @@ public class Rasterer {
         int endX = (int) ((MapServer.ROOT_ULLON - lrlon) / lonIntervalDist);
         int endY = (int) ((MapServer.ROOT_ULLAT - lrlat) / latIntervalDist);
 
-        // corresponding size of 2d array
-        // y is number of vertical gridboxes
-        // x is number of horizontal gridboxes
-        // then iterate through each index of array
-        // placing corresponding filename as a string d0_x0_y0.png for example
         int numRows = endY - startY + 1;
         int numCols = endX - startX + 1;
         String[][] grid = new String[numRows][numCols];
-        for (int row = 0; row < numRows; row++) {
-            for (int col = 0; col < numCols; col++) {
-                grid[row][col] = "d" + depth + "_x" + (col + startX) + "_y" + (row + startY) + ".png";
+        for (int y = 0; y < numRows; y++) {
+            for (int x = 0; x < numCols; x++) {
+                grid[y][x] = "d" + depth + "_x" + (x + startX) + "_y" + (y + startY) + ".png";
             }
         }
-
-        // corresponding ullon and ullat of first gridbox is
-        // the map ullon and ullat with the distance from gridbox
-        // to topleft gridbox of map
-        // corresponding lrlon and lrlat of last gridbox is
-        // the ullon and ullat of querybox with distance number of
-        // x and y intervals taken into account
-
-        // corresponding x and y gridbox is the distance from
-        // ullon and ullat of the map divided by interval distance
         double rasterULLon = MapServer.ROOT_ULLON - lonIntervalDist * startX;
         double rasterULLat = MapServer.ROOT_ULLAT - latIntervalDist * startY;
         double rasterLRLon = rasterULLon - lonIntervalDist * numCols;
