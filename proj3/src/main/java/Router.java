@@ -1,4 +1,8 @@
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.PriorityQueue;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +29,54 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        long startID = g.closest(stlon, stlat);
+        GraphDB.Node start = g.getNode(startID);
+        long destID = g.closest(destlon, destlat);
+        GraphDB.Node dest = g.getNode(destID);
+        List<Long> path = new ArrayList<>();
+        Queue<GraphDB.Node> fringe = new PriorityQueue<>();
+        for (GraphDB.Node node: g.getNodes()) {
+            if (node.equals(start)) {
+                node.setDistance(0.0);
+            } else {
+                node.setDistance(Double.MAX_VALUE);
+            }
+        }
+        double priority = start.getDistance() + h(start, destlon, destlat);
+        start.setPriority(priority);
+        fringe.add(start);
+        boolean found = false;
+        while (!fringe.isEmpty()) {
+            GraphDB.Node node = fringe.poll();
+            if (node.equals(dest)) {
+                found = true;
+                break;
+            }
+            for (long id: g.adjacent(node.id)) {
+                GraphDB.Node adjNode = g.getNode(id);
+                if (node.getDistance() + g.distance(node.id, id) < adjNode.getDistance()) {
+                    adjNode.setDistance(node.getDistance() + g.distance(node.id, id));
+                    adjNode.prev = node;
+                    double adjPriority = adjNode.getDistance() + h(adjNode, destlon, destlat);
+                    adjNode.setPriority(adjPriority);
+                    fringe.add(adjNode);
+                }
+            }
+        }
+        if (found) {
+            start.prev = null;
+            GraphDB.Node pointerNode = dest;
+            while (pointerNode != null) {
+                path.add(pointerNode.id);
+                pointerNode = pointerNode.prev;
+            }
+            Collections.reverse(path);
+        }
+        return path;
+    }
+    // heuristic method for distance from node to target
+    private static double h(GraphDB.Node node, double destlon, double destlat) {
+        return GraphDB.distance(node.lon, node.lat, destlon, destlat);
     }
 
     /**

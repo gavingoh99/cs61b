@@ -6,10 +6,12 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Iterator;
 
 /**
@@ -24,12 +26,15 @@ import java.util.Iterator;
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
-    static class Node {
+    static class Node implements Comparable<Node> {
         long id;
         String name;
         double lat;
         double lon;
         List<Long> adj = new ArrayList<>();
+        double priority;
+        Node prev = null;
+        double distance;
 
         Node(long id, double lat, double lon) {
             this.id = id;
@@ -41,6 +46,47 @@ public class GraphDB {
         }
         void addConnection(long adjID) {
             adj.add(adjID);
+        }
+        double getPriority() {
+            return this.priority;
+        }
+        void setPriority(double priority) {
+            this.priority = priority;
+        }
+        double getDistance() {
+            return this.distance;
+        }
+        void setDistance(double distance) {
+            this.distance = distance;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Node node = (Node) o;
+            return id == node.id && lat == node.lat && lon == node.lon && name == node.name;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name, lat, lon, adj);
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            double cmp = this.priority - o.priority;
+            if (cmp < 0) {
+                return -1;
+            } else if (cmp > 0) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     }
     static class Edge {
@@ -62,7 +108,15 @@ public class GraphDB {
         }
     }
     private Map<Long, Node> nodes = new HashMap<>();
-
+    public Node getNode(long id) {
+        return nodes.get(id);
+    }
+    public Collection<Node> getNodes() {
+        return nodes.values();
+    }
+    public int getSize() {
+        return nodes.size();
+    }
     public void addNode(Node node) {
         nodes.put(node.id, node);
     }
