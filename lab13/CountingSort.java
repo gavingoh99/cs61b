@@ -72,35 +72,25 @@ public class CountingSort {
             min = min < i ? min : i;
             max = max > i ? max : i;
         }
-
-        int[] counts;
-        int[] sorted;
-        // if negative shift the range such that the min is 0
-        if (min < 0) {
-            counts = new int[max - min + 1];
-            for (int i : arr) {
-                counts[i - min]++;
-            }
-            sorted = new int[arr.length];
-            int k = 0;
-            for (int i = 0; i < counts.length; i++) {
-                for (int j = 0; j < counts[i]; j++, k++) {
-                    sorted[k] = i + min;
-                }
-            }
-        } else {
-            counts = new int[max + 1];
-            for (int i : arr) {
-                counts[i]++;
-            }
-            sorted = new int[arr.length];
-            int k = 0;
-            for (int i = 0; i < counts.length; i++) {
-                for (int j = 0; j < counts[i]; j++, k++) {
-                    sorted[k] = i;
-                }
-            }
+        // make potentially negative numbers positive
+        int[] counts = new int[max - min + 1];
+        for (int i : arr) {
+            counts[i - min]++;
         }
+        int[] starts = new int[max - min + 1];
+        int pos = 0;
+        for (int i = 0; i < starts.length; i++) {
+            starts[i] = pos;
+            pos += counts[i];
+        }
+        int[] sorted = new int[arr.length];
+        for (int i = 0; i < sorted.length; i++) {
+            int item = arr[i];
+            int position = starts[item - min];
+            sorted[position] = item;
+            starts[item - min]++;
+        }
+
         return sorted;
     }
 }
