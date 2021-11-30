@@ -28,11 +28,12 @@ public class TestDirections {
         List<List<Long>> paths = pathsFromFile();
         List<List<Router.NavigationDirection>> expectedResults = resultsFromFile();
 
-        for (int i = 0; i < NUM_TESTS; i++) {
+        for (int i = 1; i < NUM_TESTS; i++) {
             System.out.println(String.format("Running test: %d", i));
             List<Long> path = paths.get(i);
             List<Router.NavigationDirection> actual = Router.routeDirections(graph, path);
             List<Router.NavigationDirection> expected = expectedResults.get(i);
+            System.out.println(actual);
             assertEquals("The directions lengths are not equal", expected.size(), actual.size());
             for (int j = 0; j < actual.size(); j++) {
                 Router.NavigationDirection actualDir = actual.get(j);
@@ -40,6 +41,7 @@ public class TestDirections {
                 assertEquals("Directions did not match", expectedDir.toString(),
                         actualDir.toString());
             }
+
         }
     }
 

@@ -1,9 +1,4 @@
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Queue;
-import java.util.PriorityQueue;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,9 +83,78 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        List<NavigationDirection> directions = new ArrayList<>();
+        int index = 0;
+        while (index < route.size() - 1) {
+            NavigationDirection direction = new NavigationDirection();
+            double distance = 0;
+            if (index == 0) {
+                direction.direction = 0;
+            } else {
+                double bearing = g.bearing(route.get(index - 1), route.get(index));
+                direction.direction = setDirection(bearing);
+            }
+            GraphDB.Edge currEdge = null;
+            //[53076845, 53076852, 58443169, 4226524585, 53082187, 4260281369, 4260281370, 53058046, 240404706, 4225207008, 53050596, 4225207004, 4621431267, 53082185, 4225207003, 4225206998, 53047322, 4225206995, 53047324]
+            while (index != route.size() - 1) {
+                if (currEdge != null) {
+                    int pos1 = currEdge.connections.indexOf(route.get(index));
+                    int pos2 = currEdge.connections.indexOf(route.get(index + 1));
+                    if (pos2 == -1) {
+                        break;
+                    } else if (Math.abs(pos1 - pos2) == 1) {
+                        distance += g.distance(route.get(index), route.get(index + 1));
+                        index++;
+                    } else {
+                        break;
+                    }
+                } else {
+                    for (GraphDB.Edge edge : g.getEdges()) {
+                        if (edge.connections.contains(route.get(index))) {
+                            int pos1 = edge.connections.indexOf(route.get(index));
+                            int pos2 = edge.connections.indexOf(route.get(index + 1));
+                            if (pos2 == -1) {
+                                continue;
+                            } else if (Math.abs(pos1 - pos2) == 1) {
+                                distance += g.distance(route.get(index), route.get(index + 1));
+                                index++;
+                                currEdge = edge;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            direction.distance = distance;
+            if (currEdge != null && currEdge.name != null) {
+                direction.way = currEdge.name;
+            }
+            directions.add(direction);
+        }
+        return directions;
     }
 
+    private static int setDirection(double bearing) {
+        if (bearing >= -15 && bearing <= 0) {
+            return 1;
+        } else if (bearing < 0) {
+            if (bearing >= -30) {
+                return 2;
+            } else if (bearing >= -100) {
+                return 4;
+            } else {
+                return 6;
+            }
+        } else {
+            if (bearing <= 30) {
+                return 3;
+            } else if (bearing <= 100) {
+                return 5;
+            } else {
+                return 7;
+            }
+        }
+    }
 
     /**
      * Class to represent a navigation direction, which consists of 3 attributes:

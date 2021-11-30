@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -93,6 +94,7 @@ public class GraphDB {
         String id;
         String name;
         boolean isValid;
+        List<Long> connections = new ArrayList<>();
 
         Edge(String id) {
             this.id = id;
@@ -106,21 +108,44 @@ public class GraphDB {
         boolean isValid() {
             return this.isValid;
         }
+        void addConnections(List<Long> connections) {
+            for (long id: connections) {
+                this.connections.add(id);
+            }
+        }
+        List<Long> getConnections() {
+            return this.connections;
+        }
+
+//        @Override
+//        public boolean equals(Object o) {
+//            if (this == o) return true;
+//            if (o == null || getClass() != o.getClass()) return false;
+//            Edge edge = (Edge) o;
+//            return isValid == edge.isValid && Objects.equals(id, edge.id) && Objects.equals(name, edge.name);
+//        }
+//
+//        @Override
+//        public int hashCode() {
+//            return Objects.hash(id, name, isValid);
+//        }
     }
     private Map<Long, Node> nodes = new HashMap<>();
+    public List<Edge> ways = new ArrayList<>();
     public Node getNode(long id) {
         return nodes.get(id);
     }
     public Collection<Node> getNodes() {
         return nodes.values();
     }
+    public List<Edge> getEdges() { return ways; }
     public int getSize() {
         return nodes.size();
     }
     public void addNode(Node node) {
         nodes.put(node.id, node);
     }
-    public void addEdge(List<Long> connections) {
+    public void addEdge(List<Long> connections, Edge way) {
         for (int index = 0; index < connections.size(); index++) {
             long key = connections.get(index);
             if (index - 1 > -1) {
@@ -129,6 +154,19 @@ public class GraphDB {
             if (index + 1 < connections.size()) {
                 nodes.get(key).addConnection(connections.get(index + 1));
             }
+        }
+        boolean present = false;
+        if (!ways.isEmpty() && way.name != null) {
+            for (Edge edge : ways) {
+                if (edge.name != null && edge.name.equals(way.name)) {
+                    edge.addConnections(connections);
+                    present = true;
+                }
+            }
+        }
+        if (!present) {
+            way.addConnections(connections);
+            ways.add(way);
         }
     }
 

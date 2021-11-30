@@ -155,7 +155,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
             if (lastEdge.isValid()) {
-                this.g.addEdge(possibleConnections);
+                this.g.addEdge(possibleConnections, lastEdge);
             }
             lastEdge = null;
             possibleConnections.clear();
