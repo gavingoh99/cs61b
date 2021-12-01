@@ -5,13 +5,9 @@ public class SeamCarver {
     private Picture picture;
     private double[][] energies;
     private double[][] minimum;
-    public static void main(String[] args) {
-        Picture test = new Picture("images/4x6.png");
-        SeamCarver sc = new SeamCarver(test);
-        System.out.println(sc.minFinder(3, 5));
-    }
+
     public SeamCarver(Picture picture) {
-        this.picture = picture;
+        this.picture = new Picture(picture);
         this.energies = new double[height()][width()];
         this.minimum = new double[height()][width()];
     }
@@ -89,9 +85,13 @@ public class SeamCarver {
         }
         for (int h = 1; h < height(); h++) {
             for (int w = 0; w < width(); w++) {
-                double energy = energy(w, h);
-                double min = minFinder(w, h);
-                minimum[h][w] = energy + min;
+                minimum[h][w] = energy(w, h) + minimum[h - 1][w];
+                if (w - 1 >= 0 && energy(w, h) + minimum[h - 1][w - 1] < minimum[h][w]) {
+                    minimum[h][w] = energy(w, h) + minimum[h - 1][w - 1];
+                }
+                if (w + 1 <= width() - 1 && energy(w, h) + minimum[h - 1][w + 1] < minimum[h][w]) {
+                    minimum[h][w] = energy(w, h) + minimum[h - 1][w + 1];
+                }
             }
         }
         double min = Double.MAX_VALUE;
@@ -118,16 +118,6 @@ public class SeamCarver {
         }
         return seam;
     }
-    public double minFinder(int x, int y) {
-        if (x == 0) {
-            return Math.min(minimum[y - 1][x], minimum[y - 1][x + 1]);
-        }
-        if (x == width() - 1) {
-            return Math.min(minimum[y - 1][x - 1], minimum[y - 1][x]);
-        }
-        double min = Math.min(minimum[y - 1][x - 1], minimum[y - 1][x]);
-        return Math.min(min, minimum[y - 1][x + 1]);
-    }
     public void removeHorizontalSeam(int[] seam) {
         if (seam.length == 0) {
             return;
@@ -139,7 +129,6 @@ public class SeamCarver {
         } else {
             throw new IllegalArgumentException();
         }
-
     }
     public void removeVerticalSeam(int[] seam) {
         if (seam.length == 0) {
