@@ -5,13 +5,18 @@ public class SeamCarver {
     private Picture picture;
     private double[][] energies;
     private double[][] minimum;
+    public static void main(String[] args) {
+        Picture test = new Picture("images/4x6.png");
+        SeamCarver sc = new SeamCarver(test);
+        System.out.println(sc.minFinder(3, 5));
+    }
     public SeamCarver(Picture picture) {
         this.picture = picture;
         this.energies = new double[height()][width()];
         this.minimum = new double[height()][width()];
     }
     public Picture picture() {
-        return this.picture;
+        return new Picture(this.picture);
     }
     public int width() {
         return this.picture.width();
@@ -75,13 +80,24 @@ public class SeamCarver {
         int[] seam = findVerticalSeam();
         this.picture = placeholder;
         this.energies = tempEnergies;
+        this.minimum = tempMinimums;
         return seam;
     }
     public int[] findVerticalSeam() {
+        for (int w = 0; w < width(); w++) {
+            this.minimum[0][w] = energy(w, 0);
+        }
+        for (int h = 1; h < height(); h++) {
+            for (int w = 0; w < width(); w++) {
+                double energy = energy(w, h);
+                double min = minFinder(w, h);
+                minimum[h][w] = energy + min;
+            }
+        }
         double min = Double.MAX_VALUE;
         int x = -1;
         for (int col = 0; col < width(); col++) {
-            double curr = minFinder(col, height() - 1);
+            double curr = minimum[height() - 1][col];
             if (curr < min) {
                 min = curr;
                 x = col;
@@ -94,38 +110,55 @@ public class SeamCarver {
             if (height == 0) {
                 break;
             }
-            if (x - 1 >= 0 && min == minFinder(x - 1, height - 1)) {
+            if (x - 1 >= 0 && min == minimum[height - 1][x - 1]) {
                 x = x - 1;
-            } else if (x + 1 < width() && min == minFinder(x + 1, height - 1)) {
+            } else if (x + 1 < width() && min == minimum[height - 1][x + 1]) {
                 x = x + 1;
             }
         }
         return seam;
     }
-    private double minFinder(int x, int y) {
-        if (y == 0) {
-            return energy(x, y);
+    public double minFinder(int x, int y) {
+        if (x == 0) {
+            return Math.min(minimum[y - 1][x], minimum[y - 1][x + 1]);
         }
-        if (minimum[y][x] == 0.0) {
-            double min = energy(x, y);
-            double minAbove = minFinder(x, y - 1);
-            double minDiagonalLeft = x > 0 ? minFinder(x - 1, y - 1) : Double.MAX_VALUE;
-            double minDiagonalRight = x < width() - 1 ? minFinder(x + 1, y - 1) : Double.MAX_VALUE;
-            if (minAbove < minDiagonalLeft && minAbove < minDiagonalRight) {
-                min += minAbove;
-            } else if (minDiagonalLeft < minAbove && minDiagonalLeft < minDiagonalRight) {
-                min += minDiagonalLeft;
-            } else {
-                min += minDiagonalRight;
-            }
-            minimum[y][x] = min;
+        if (x == width() - 1) {
+            return Math.min(minimum[y - 1][x - 1], minimum[y - 1][x]);
         }
-        return minimum[y][x];
+        double min = Math.min(minimum[y - 1][x - 1], minimum[y - 1][x]);
+        return Math.min(min, minimum[y - 1][x + 1]);
     }
     public void removeHorizontalSeam(int[] seam) {
-        this.picture = SeamRemover.removeHorizontalSeam(this.picture, seam);
+        if (seam.length == 0) {
+            return;
+        }
+        if (checkSeam(seam)) {
+            this.picture = SeamRemover.removeHorizontalSeam(this.picture, seam);
+            this.energies = new double[height()][width()];
+            this.minimum = new double[height()][width()];
+        } else {
+            throw new IllegalArgumentException();
+        }
+
     }
     public void removeVerticalSeam(int[] seam) {
-        this.picture = SeamRemover.removeVerticalSeam(this.picture, seam);
+        if (seam.length == 0) {
+            return;
+        }
+        if (checkSeam(seam)) {
+            this.picture = SeamRemover.removeVerticalSeam(this.picture, seam);
+            this.energies = new double[height()][width()];
+            this.minimum = new double[height()][width()];
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    private boolean checkSeam(int[] seam) {
+        for (int index = 0; index < seam.length - 1; index++) {
+            if (Math.abs(seam[index] - seam[index + 1]) > 1) {
+                return false;
+            }
+        }
+        return true;
     }
 }
