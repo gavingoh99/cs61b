@@ -47,25 +47,34 @@ public class Boggle {
                 board[index][i] = lines[index].charAt(i);
             }
         }
-        for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col < board[row].length; col++) {
-                boolean[][] visited = new boolean[board.length][board[row].length];
-                List<String> wordsFrom = longestWords(board, col, row, "" + board[row][col], trie, visited);
-                if (wordsFrom != null) {
-                    for (String word: wordsFrom) {
-                        if (trie.containsWord(word) && word != null && (words.isEmpty() || !words.contains(word))) {
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                boolean[][] visited = new boolean[board.length][board[y].length];
+                List<String> list = longestWords(board, x, y, "" + board[y][x], trie, visited);
+                if (list != null) {
+                    for (String word: list) {
+                        if (trie.containsWord(word) && word != null
+                                && (words.isEmpty() || !words.contains(word))) {
                             words.add(word);
                         }
                     }
                 }
             }
         }
-        Collections.sort(words, Comparator.comparing(String::length, (length1, length2) -> {return length2 - length1;}).thenComparing(String.CASE_INSENSITIVE_ORDER));
+        Collections.sort(words, Comparator.comparing(String::length,
+            (length1, length2) -> {
+                return length2 - length1;
+            })
+                .thenComparing(String.CASE_INSENSITIVE_ORDER));
 
-
-        return words.subList(0, k);
+        if (k < words.size()) {
+            return words.subList(0, k);
+        }
+        return words;
     }
-    private static List<String> longestWords(char[][] board, int x, int y, String word, Trie trie, boolean[][] visited) {
+    private static List<String> longestWords(char[][] board,
+                                             int x, int y, String word,
+                                             Trie trie, boolean[][] visited) {
         if (!trie.containsPrefix(word)) {
             return null;
         }
@@ -75,19 +84,22 @@ public class Boggle {
         }
         if (x - 1 >= 0) {
             if (!visited[y][x - 1]) {
-                List<String> words1 = longestWords(board, x - 1, y, word + board[y][x - 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words1 = longestWords(board, x - 1, y,
+                        word + board[y][x - 1], trie, makeVisitedArray(visited, x, y));
                 if (words1 != null) {
                     words.addAll(words1);
                 }
             }
             if (y - 1 >= 0 && !visited[y - 1][x - 1]) {
-                List<String> words2 = longestWords(board, x - 1, y - 1, word + board[y - 1][x - 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words2 = longestWords(board, x - 1, y - 1,
+                        word + board[y - 1][x - 1], trie, makeVisitedArray(visited, x, y));
                 if (words2 != null) {
                     words.addAll(words2);
                 }
             }
             if (y + 1 < board.length && !visited[y + 1][x - 1]) {
-                List<String> words3 = longestWords(board, x - 1, y + 1, word + board[y + 1][x - 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words3 = longestWords(board, x - 1, y + 1,
+                        word + board[y + 1][x - 1], trie, makeVisitedArray(visited, x, y));
                 if (words3 != null) {
                     words.addAll(words3);
                 }
@@ -95,32 +107,37 @@ public class Boggle {
         }
         if (x + 1 < board[0].length) {
             if (!visited[y][x + 1]) {
-                List<String> words4 = longestWords(board, x + 1, y, word + board[y][x + 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words4 = longestWords(board, x + 1, y,
+                        word + board[y][x + 1], trie, makeVisitedArray(visited, x, y));
                 if (words4 != null) {
                     words.addAll(words4);
                 }
             }
             if (y - 1 >= 0 && !visited[y - 1][x + 1]) {
-                List<String> words5 = longestWords(board, x + 1, y - 1, word + board[y - 1][x + 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words5 = longestWords(board, x + 1, y - 1,
+                        word + board[y - 1][x + 1], trie, makeVisitedArray(visited, x, y));
                 if (words5 != null) {
                     words.addAll(words5);
                 }
             }
             if (y + 1 < board.length && !visited[y + 1][x + 1]) {
-                List<String> words6 = longestWords(board, x + 1, y + 1, word + board[y + 1][x + 1], trie, makeVisitedArray(visited, x, y));
+                List<String> words6 = longestWords(board, x + 1, y + 1,
+                        word + board[y + 1][x + 1], trie, makeVisitedArray(visited, x, y));
                 if (words6 != null) {
                     words.addAll(words6);
                 }
             }
         }
         if (y - 1 >= 0 && !visited[y - 1][x]) {
-            List<String> words7 = longestWords(board, x, y - 1, word + board[y - 1][x], trie, makeVisitedArray(visited, x, y));
+            List<String> words7 = longestWords(board, x, y - 1,
+                    word + board[y - 1][x], trie, makeVisitedArray(visited, x, y));
             if (words7 != null) {
                 words.addAll(words7);
             }
         }
         if (y + 1 < board.length && !visited[y + 1][x]) {
-            List<String> words8 = longestWords(board, x, y + 1, word + board[y + 1][x], trie, makeVisitedArray(visited, x, y));
+            List<String> words8 = longestWords(board, x, y + 1,
+                    word + board[y + 1][x], trie, makeVisitedArray(visited, x, y));
             if (words8 != null) {
                 words.addAll(words8);
             }
