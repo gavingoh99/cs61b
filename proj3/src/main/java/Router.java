@@ -1,4 +1,11 @@
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.PriorityQueue;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,81 +86,42 @@ public class Router {
      * @param g The graph to use.
      * @param route The route to translate into directions. Each element
      *              corresponds to a node from the graph in the route.
-     * @return A list of NavigatiionDirection objects corresponding to the input
+     * @return A list of NavigationDirection objects corresponding to the input
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
         List<NavigationDirection> directions = new ArrayList<>();
-        int index = 0;
-        while (index < route.size() - 1) {
-            NavigationDirection direction = new NavigationDirection();
-            double distance = 0;
-            if (index == 0) {
-                direction.direction = 0;
-            } else {
-                double bearing = g.bearing(route.get(index - 1), route.get(index));
-                direction.direction = setDirection(bearing);
+        if (route.size() <= 1) {
+            return directions;
+        }
+        // initalize the first direction instance
+        NavigationDirection direction = new NavigationDirection();
+        direction.direction = NavigationDirection.START;
+        direction.distance = 0.0;
+        direction.way = NavigationDirection.getWay(g, route.get(0), route.get(1)).name;
+        // iterate through all the nodes
+        for (int i = 1; i < route.size(); i++) {
+            long prev = route.get(i - 1);
+            long curr = route.get(i);
+            direction.distance += g.distance(prev, curr);
+            if (i == route.size() - 1) {
+                directions.add(direction);
+                break;
             }
-            GraphDB.Edge currEdge = null;
-            //[53076845, 53076852, 58443169, 4226524585, 53082187, 4260281369, 4260281370, 53058046, 240404706, 4225207008, 53050596, 4225207004, 4621431267, 53082185, 4225207003, 4225206998, 53047322, 4225206995, 53047324]
-            while (index != route.size() - 1) {
-                if (currEdge != null) {
-                    int pos1 = currEdge.connections.indexOf(route.get(index));
-                    int pos2 = currEdge.connections.indexOf(route.get(index + 1));
-                    if (pos2 == -1) {
-                        break;
-                    } else if (Math.abs(pos1 - pos2) == 1) {
-                        distance += g.distance(route.get(index), route.get(index + 1));
-                        index++;
-                    } else {
-                        break;
-                    }
-                } else {
-                    for (GraphDB.Edge edge : g.getEdges()) {
-                        if (edge.connections.contains(route.get(index))) {
-                            int pos1 = edge.connections.indexOf(route.get(index));
-                            int pos2 = edge.connections.indexOf(route.get(index + 1));
-                            if (pos2 == -1) {
-                                continue;
-                            } else if (Math.abs(pos1 - pos2) == 1) {
-                                distance += g.distance(route.get(index), route.get(index + 1));
-                                index++;
-                                currEdge = edge;
-                                break;
-                            }
-                        }
-                    }
-                }
+            // if the way that connects the curr and next node
+            // differs from the current way then add the curr direction
+            // to the list and instantiate a new one for the next
+            // round of iteration
+            long next = route.get(i + 1);
+            if (!direction.way.equals(NavigationDirection.getWay(g, curr, next).name)) {
+                directions.add(direction);
+                direction = new NavigationDirection();
+                direction.direction = NavigationDirection.getDirection(g, prev, curr, next);
+                direction.distance = 0.0;
+                direction.way = NavigationDirection.getWay(g, curr, next).name;
             }
-            direction.distance = distance;
-            if (currEdge != null && currEdge.name != null) {
-                direction.way = currEdge.name;
-            }
-            directions.add(direction);
         }
         return directions;
-    }
-
-    private static int setDirection(double bearing) {
-        if (bearing >= -15 && bearing <= 0) {
-            return 1;
-        } else if (bearing < 0) {
-            if (bearing >= -30) {
-                return 2;
-            } else if (bearing >= -100) {
-                return 4;
-            } else {
-                return 6;
-            }
-        } else {
-            if (bearing <= 30) {
-                return 3;
-            } else if (bearing <= 100) {
-                return 5;
-            } else {
-                return 7;
-            }
-        }
     }
 
     /**
@@ -213,6 +181,61 @@ public class Router {
             return String.format("%s on %s and continue for %.3f miles.",
                     DIRECTIONS[direction], way, distance);
         }
+        /**
+         * Returns the change in direction between 2 highway segments determined by 3 nodes,
+         * given an instance of GraphDB and the Node ids of 3 nodes. The change in direction
+         * is calculated based on the bearing angle of each highway segment.
+         */
+        public static int getDirection(GraphDB g, long n1, long n2, long n3) {
+            double angle = g.bearing(n3, n2) - g.bearing(n2, n1);
+            int direction = START;
+            if (-15 < angle && angle < 15) {
+                direction = STRAIGHT;
+            } else if (-30 < angle && angle <= -15) {
+                direction = SLIGHT_LEFT;
+            } else if (15 <= angle && angle < 30) {
+                direction = SLIGHT_RIGHT;
+            } else if (-100 < angle && angle <= -30) {
+                direction = LEFT;
+            } else if (30 <= angle && angle < 100) {
+                direction = RIGHT;
+            } else if (angle <= -100) {
+                direction = g.bearing(n3, n1) < 0 ? SHARP_LEFT : SHARP_RIGHT;
+            } else if (100 <= angle) {
+                direction = g.bearing(n3, n1) > 0 ? SHARP_LEFT : SHARP_RIGHT;
+            }
+            return direction;
+        }
+        /**
+         * Obtains the Highway that passes by 2 nodes.
+         * The calculation is based on the fact that, for this model, exactly 1 highway can
+         * pass by 2 given points.
+         * @param g is the graph (GraphDB) to use.
+         * @param n1 is the Node id of one of the nodes that the highway contains.
+         * @param n2 is the Node id of one of the nodes that the highway contains.
+         * @return the Highway that passes by the 2 nodes passed as parameter.
+         */
+        public static GraphDB.Edge getWay(GraphDB g, long n1, long n2) {
+            Iterable<GraphDB.Edge> ways = g.getEdges();
+            Set<GraphDB.Edge> way1 = new HashSet<>();
+            Set<GraphDB.Edge> way2 = new HashSet<>();
+            for (GraphDB.Edge way: ways) {
+                if (way.connections.contains(n1)) {
+                    way1.add(way);
+                }
+                if (way.connections.contains(n2)) {
+                    way2.add(way);
+                }
+            }
+            Set<GraphDB.Edge> intersectingWays = new HashSet<>();
+            for (GraphDB.Edge way: way1) {
+                if (way2.contains(way)) {
+                    intersectingWays.add(way);
+                }
+            }
+            return intersectingWays.iterator().next();
+        }
+
 
         /**
          * Takes the string representation of a navigation direction and converts it into

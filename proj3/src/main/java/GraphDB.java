@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -29,7 +28,7 @@ public class GraphDB {
      * creating helper classes, e.g. Node, Edge, etc. */
     static class Node implements Comparable<Node> {
         long id;
-        String name;
+        String name = null;
         double lat;
         double lon;
         List<Long> adj = new ArrayList<>();
@@ -45,6 +44,9 @@ public class GraphDB {
         void setName(String name) {
             this.name = name;
         }
+        String getName() {
+            return this.name;
+        }
         void addConnection(long adjID) {
             adj.add(adjID);
         }
@@ -59,6 +61,9 @@ public class GraphDB {
         }
         void setDistance(double distance) {
             this.distance = distance;
+        }
+        boolean hasName() {
+            return this.name != null;
         }
 
         @Override
@@ -108,39 +113,27 @@ public class GraphDB {
         boolean isValid() {
             return this.isValid;
         }
-        void addConnections(List<Long> connections) {
-            for (long id: connections) {
-                this.connections.add(id);
+        void addConnections(List<Long> list) {
+            for (long node: list) {
+                this.connections.add(node);
             }
         }
         List<Long> getConnections() {
             return this.connections;
         }
-
-//        @Override
-//        public boolean equals(Object o) {
-//            if (this == o) return true;
-//            if (o == null || getClass() != o.getClass()) return false;
-//            Edge edge = (Edge) o;
-//            return isValid == edge.isValid && Objects.equals(id, edge.id) && Objects.equals(name, edge.name);
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return Objects.hash(id, name, isValid);
-//        }
     }
     private Map<Long, Node> nodes = new HashMap<>();
-    public List<Edge> ways = new ArrayList<>();
+    private List<Edge> ways = new ArrayList<>();
+    private Trie locationTrie;
+    private Map<String, List<Node>> locationMap;
     public Node getNode(long id) {
         return nodes.get(id);
     }
     public Collection<Node> getNodes() {
         return nodes.values();
     }
-    public List<Edge> getEdges() { return ways; }
-    public int getSize() {
-        return nodes.size();
+    public List<Edge> getEdges() {
+        return ways;
     }
     public void addNode(Node node) {
         nodes.put(node.id, node);
@@ -155,19 +148,8 @@ public class GraphDB {
                 nodes.get(key).addConnection(connections.get(index + 1));
             }
         }
-        boolean present = false;
-        if (!ways.isEmpty() && way.name != null) {
-            for (Edge edge : ways) {
-                if (edge.name != null && edge.name.equals(way.name)) {
-                    edge.addConnections(connections);
-                    present = true;
-                }
-            }
-        }
-        if (!present) {
-            way.addConnections(connections);
-            ways.add(way);
-        }
+        way.addConnections(connections);
+        ways.add(way);
     }
 
     /**
@@ -185,6 +167,7 @@ public class GraphDB {
             SAXParser saxParser = factory.newSAXParser();
             GraphBuildingHandler gbh = new GraphBuildingHandler(this);
             saxParser.parse(inputStream, gbh);
+            initializeTrieAndLocationMap();
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
@@ -320,5 +303,69 @@ public class GraphDB {
      */
     double lat(long v) {
         return nodes.get(v).lat;
+    }
+
+    // initialize trie and map
+    // iterates through all nodes and adds those with names
+    // to the trie and the location map
+    private void initializeTrieAndLocationMap() {
+        locationTrie = new Trie();
+        locationMap = new HashMap<>();
+        for (Node node: nodes.values()) {
+            if (node.hasName()) {
+                String cleanedName = cleanString(node.getName());
+                locationTrie.addWord(cleanedName);
+                if (!locationMap.containsKey(cleanedName)) {
+                    locationMap.put(cleanedName, new ArrayList<>());
+                }
+                locationMap.get(cleanedName).add(node);
+            }
+        }
+    }
+    /**
+     * In linear time, collect all the names of OSM locations that prefix-match the query string.
+     * @param prefix Prefix string to be searched for. Could be any case, with our without
+     *               punctuation.
+     * @return A List of the full names of locations whose cleaned name matches the
+     * cleaned prefix.
+     */
+    List<String> getLocationsByPrefix(String prefix) {
+        prefix = prefix.toLowerCase();
+        List<String> cleanNames = locationTrie.getWordsByPrefix(prefix);
+        List<String> locationNames = new ArrayList<>();
+        for (String name: cleanNames) {
+            List<Node> locations = locationMap.get(name);
+            for (Node node: locations) {
+                locationNames.add(node.getName());
+            }
+        }
+        return locationNames;
+    }
+    /**
+     * Collect all locations that match a cleaned locationName, and return information about
+     * each node that matches.
+     * @param locationName A full name of a location searched for.
+     * @return A list of locations whose cleaned name matches the
+     * cleaned locationName, and each location is a map of parameters for the Json response
+     * as specified:
+     * "lat" : Number, The latitude of the node.
+     * "lon" : Number, The longitude of the node.
+     * "name" : String, The actual name of the node.
+     * "id" : Number, The id of the node.
+     * NOTE: A particular location may span many Location instances. I.e.: may occupy many nodes.
+     */
+    List<Map<String, Object>> getLocations(String locationName) {
+        locationName = cleanString(locationName);
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Node> locations = locationMap.get(locationName);
+        for (Node node: locations) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", node.id);
+            data.put("lon", node.lon);
+            data.put("lat", node.lat);
+            data.put("name", node.name);
+            result.add(data);
+        }
+        return result;
     }
 }
