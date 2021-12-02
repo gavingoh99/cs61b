@@ -44,52 +44,19 @@ public class BinaryTrie implements Serializable {
         this.root = pq.delMin();
     }
     public Match longestPrefixMatch(BitSequence querySequence) {
-        String sequence = querySequence.toString();
-        String longest = "";
-        int index = 0;
-        while (index != sequence.length()) {
-            if (containsPrefix(longest + sequence.charAt(index))) {
-                longest += sequence.charAt(index);
-                index++;
+        return longestPrefixMatch(querySequence, root, 0, "");
+    }
+    private Match longestPrefixMatch(BitSequence querySequence, Node node, int index, String s) {
+        if (node.isLeaf()) {
+            return new Match(new BitSequence(s), node.ch);
+        } else {
+            int bit = querySequence.bitAt(index);
+            if (bit == 0) {
+                return longestPrefixMatch(querySequence, node.left, index + 1, s + "0");
             } else {
-                break;
+                return longestPrefixMatch(querySequence, node.right, index + 1, s + "1");
             }
         }
-        if (longest.isEmpty()) {
-            return null;
-        }
-        char correspondingChar = findCorrespondingChar(longest);
-        BitSequence correspondingSeq = querySequence.firstNBits(index);
-        return new Match(correspondingSeq, correspondingChar);
-    }
-    private char findCorrespondingChar(String sequence) {
-        Node pointer = this.root;
-        int index = 0;
-        while (index != sequence.length()) {
-            if (sequence.charAt(index) == '0') {
-                pointer = pointer.left;
-            } else if (sequence.charAt(index) == '1') {
-                pointer = pointer.right;
-            }
-            index++;
-        }
-        return pointer.ch;
-    }
-    private boolean containsPrefix(String prefix) {
-        int index = 0;
-        Node pointer = this.root;
-        while (index != prefix.length()) {
-            if (prefix.charAt(index) == '0') {
-                pointer = pointer.left;
-            } else if (prefix.charAt(index) == '1') {
-                pointer = pointer.right;
-            }
-            if (pointer == null) {
-                return false;
-            }
-            index++;
-        }
-        return true;
     }
     public Map<Character, BitSequence> buildLookupTable() {
         buildLookupTable("", root);
