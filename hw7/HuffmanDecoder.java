@@ -10,7 +10,6 @@ public class HuffmanDecoder {
         BitSequence cumulative = (BitSequence) reader.readObject();
         List<Character> symbols = new ArrayList<>();
         while (cumulative.length() != 0) {
-            System.out.println(cumulative.length());
             Match curr = trie.longestPrefixMatch(cumulative);
             if (curr == null) {
                 break;
